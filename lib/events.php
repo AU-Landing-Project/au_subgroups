@@ -18,6 +18,12 @@ function au_subgroups_group_permissions($event, $type, $object) {
     return TRUE;
   }
   
+  // subgroups aren't enabled, how are we creating a new subgroup?
+  if ($parent->enable_subgroups == 'no' && $type == 'create') {
+    register_error(elgg_echo('au_subtypes:error:create:disabled'));
+    return FALSE;
+  }
+  
   // we know it's a sub-group, make sure the permissions are that of the parent acl
   if ($object->access_id == $parent->group_acl) {
     return TRUE;

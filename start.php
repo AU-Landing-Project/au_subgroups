@@ -34,6 +34,9 @@ function au_subgroups_init() {
   
   // admins of the parent group can edit the sub-group
   elgg_register_plugin_hook_handler('permissions_check', 'group', 'au_subgroups_group_canedit');
+  
+  // sort out what happens when a parent group is deleted
+  elgg_register_plugin_hook_handler('action', 'groups/delete', 'au_subgroups_delete_group');
 }
 
 

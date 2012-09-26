@@ -40,30 +40,61 @@ function au_subgroups_breadcrumb_override($params) {
   }
 }
 
+
+function au_subgroups_delete_entities($result, $getter, $options) {
+  $result->delete();
+}
+
 /**
- * Sets breadcrumbs from 'All groups' to current parent
- * iterating through all parent groups
+ * recursively travels down all routes to gather all guids of
+ * groups that are children of the supplied group
+ * 
  * @param type $group
+ * @param type $guids
+ * @return type
  */
-function au_subgroups_parent_breadcrumbs($group, $push = true) {
-  $parents = array();
+function au_subgroups_get_all_children_guids($group, $guids = array()) {
+  // get children and delete them
+  $children = au_subgroups_get_subgroups($group, 0);
   
-  while($parent = au_subgroups_get_parent_group($group)) {
-    $parents[] = array('title' => $parent->name, 'link' => $parent->getURL());
-    $group = $parent;
+  if (!$children) {
+    return $guids;
   }
   
-  $parents = array_reverse($parents);
+  foreach ($children as $child) {
+    $guids[] = $child->guid;
+  }
   
-  if ($push) {
-    elgg_push_breadcrumb(elgg_echo('groups'), elgg_get_site_url() . 'groups/all');
-    foreach ($parents as $breadcrumb) {
-      elgg_push_breadcrumb($breadcrumb['title'], $breadcrumb['link']);
-    }
+  foreach ($children as $child) {
+    $guids = au_subgroups_get_all_children_guids($child, $guids);
   }
-  else {
-    return $parents;
+  
+  return $guids;
+}
+
+/**
+ * Determines if a group is a subgroup of another group
+ * 
+ * @param type $group
+ * return ElggGroup | false
+ */
+function au_subgroups_get_parent_group($group) {
+  if (!elgg_instanceof($group, 'group')) {
+    return false;
   }
+  
+  $parent = elgg_get_entities_from_relationship(array(
+            'types' => array('group'),
+            'limit' => 1,
+            'relationship' => AU_SUBGROUPS_RELATIONSHIP,
+            'relationship_guid' => $group->guid,
+          ));
+  
+  if (is_array($parent)) {
+    return $parent[0];
+  }
+  
+  return false;
 }
 
 
@@ -103,30 +134,47 @@ function au_subgroups_list_subgroups($group, $limit = 10, $sortbytitle = false) 
   return elgg_list_entities_from_relationship($options);
 }
 
-/**
- * Determines if a group is a subgroup of another group
- * 
- * @param type $group
- * return ElggGroup | false
- */
-function au_subgroups_get_parent_group($group) {
-  if (!elgg_instanceof($group, 'group')) {
-    return false;
+
+function au_subgroups_move_content($result, $getter, $options) {
+  switch ($options['au_subgroups_content_policy']) {
+    case 'owner':
+      $result->container_guid = $result->owner_guid;
+      $result->save();
+      break;
+    
+    case 'parent':
+      $result->container_guid = $options['au_subgroups_parent_guid'];
+      $result->save();
+      break;
   }
-  
-  $parent = elgg_get_entities_from_relationship(array(
-            'types' => array('group'),
-            'limit' => 1,
-            'relationship' => AU_SUBGROUPS_RELATIONSHIP,
-            'relationship_guid' => $group->guid,
-          ));
-  
-  if (is_array($parent)) {
-    return $parent[0];
-  }
-  
-  return false;
 }
+
+/**
+ * Sets breadcrumbs from 'All groups' to current parent
+ * iterating through all parent groups
+ * @param type $group
+ */
+function au_subgroups_parent_breadcrumbs($group, $push = true) {
+  $parents = array();
+  
+  while($parent = au_subgroups_get_parent_group($group)) {
+    $parents[] = array('title' => $parent->name, 'link' => $parent->getURL());
+    $group = $parent;
+  }
+  
+  $parents = array_reverse($parents);
+  
+  if ($push) {
+    elgg_push_breadcrumb(elgg_echo('groups'), elgg_get_site_url() . 'groups/all');
+    foreach ($parents as $breadcrumb) {
+      elgg_push_breadcrumb($breadcrumb['title'], $breadcrumb['link']);
+    }
+  }
+  else {
+    return $parents;
+  }
+}
+
 
 // links the subgroup with the parent group
 function au_subgroups_set_parent_group($group_guid, $parent_guid) {

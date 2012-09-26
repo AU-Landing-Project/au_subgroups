@@ -8,3 +8,4 @@ Properties of Subgroups
 - only members of the parent group can join a sub-group
 - sub-groups are fully qualified groups in their own right, may have sub-groups of their own
 - infinite depth of sub-groups
+- breadcrumb navigation on group pages shows path from parent to current group
