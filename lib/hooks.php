@@ -33,23 +33,26 @@ function au_subgroups_delete_group($hook, $type, $return, $params) {
       set_time_limit(0);
       $guids = au_subgroups_get_all_children_guids($group);
       
-      if ($content_policy != 'delete') {
-        $options = array(
-          'container_guids' => $guids,
-          'au_subgroups_content_policy' => $content_policy,
-          'au_subgroups_parent_guid' => $parent->guid,
-          'limit' => 0
-        );
+      if (is_array($guids) && count($guids)) {
+        if ($content_policy != 'delete' && is_array($guids) && count($guids)) {
+          $options = array(
+            'container_guids' => $guids,
+            'au_subgroups_content_policy' => $content_policy,
+            'au_subgroups_parent_guid' => $parent->guid,
+            'limit' => 0
+          );
       
-        $batch = new ElggBatch('elgg_get_entities', $options, 'au_subgroups_move_content', 25);
-      }
+          $batch = new ElggBatch('elgg_get_entities', $options, 'au_subgroups_move_content', 25);
+        }
 
-      // now delete the groups themselves
-      $options = array(
-          'guids' => $guids,
-          'limit' => 0
-      );
-      $batch = new ElggBatch('elgg_get_entities', $options, 'au_subgroups_delete_entities', 25, false);
+        // now delete the groups themselves
+        $options = array(
+            'guids' => $guids,
+            'types' => array('group'),
+            'limit' => 0
+        );
+        $batch = new ElggBatch('elgg_get_entities', $options, 'au_subgroups_delete_entities', 25, false);
+      }
     }
   }
 }
@@ -135,7 +138,7 @@ function au_subgroups_owner_block_menu($hook, $type, $return, $params) {
     $section = 'z-au_subgroups';
     
     // link to subgroups page
-    if ($params['entity']->subgroups_enable != "no") {
+    if ($params['entity']->subgroups_enable != "no" && $params['entity']->isMember()) {
       $url = "groups/subgroups/{$params['entity']->guid}/all";
       $item = new ElggMenuItem('au_subgroups', elgg_echo('au_subgroups:subgroups'), $url);
       $item->setSection($section);

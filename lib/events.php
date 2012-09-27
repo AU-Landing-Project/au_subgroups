@@ -29,12 +29,22 @@ function au_subgroups_group_permissions($event, $type, $object) {
     return TRUE;
   }
   
-  // we need to update it
+  // we need to update it - first in memory, then in the db
+  $object->access_id = $parent->group_acl;
   $q = "UPDATE " . elgg_get_config('dbprefix') . "entities SET access_id = {$parent->group_acl} WHERE guid = {$object->guid}";
   update_data($q);
+  // make sure our metadata follows suit
+  metadata_update('update', 'group', $object);
 }
 
-
+/**
+ * Prevents users from joining a subgroup if they're not a member of the parent
+ * 
+ * @param type $event
+ * @param type $type
+ * @param ElggRelationship $object
+ * @return boolean
+ */
 function au_subgroups_join_group($event, $type, $object) {
   if ($object instanceof ElggRelationship) {
     $user = get_entity($object->guid_one);
@@ -47,5 +57,20 @@ function au_subgroups_join_group($event, $type, $object) {
         return false;
       }
     }
+  }
+}
+
+/**
+ * When leaving a group, make sure users are removed from any subgroups
+ * 
+ * @param type $event
+ * @param type $type
+ * @param type $object
+ */
+function au_subgroups_leave_group($event, $type, $params) {
+  $guids = au_subgroups_get_all_children_guids($params['group']);
+  
+  foreach ($guids as $guid) {
+    leave_group($guid, $params['user']->guid);
   }
 }

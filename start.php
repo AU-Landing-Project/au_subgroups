@@ -14,12 +14,19 @@ elgg_register_event_handler('init', 'system', 'au_subgroups_init');
 elgg_register_event_handler('create', 'group', 'au_subgroups_group_permissions');
 elgg_register_event_handler('update', 'group', 'au_subgroups_group_permissions');
 elgg_register_event_handler('create', 'member', 'au_subgroups_join_group');
+elgg_register_event_handler('leave', 'group', 'au_subgroups_leave_group');
 
 function au_subgroups_init() {
   // add in our own css
   elgg_extend_view('css/elgg', 'au_subgroups/css');
   elgg_extend_view('forms/groups/edit', 'forms/au_subgroups/edit');
   elgg_extend_view('navigation/breadcrumbs', 'au_subgroups/breadcrumb_override', 1);
+  elgg_extend_view('group/elements/summary', 'au_subgroups/group/elements/summary');
+  
+  $display_subgroups = elgg_get_plugin_setting('display_subgroups', 'au_subgroups');
+  if ($display_subgroups != 'yes') {
+    elgg_register_library('elgg:groups', elgg_get_plugins_path() . 'au_subgroups/lib/groups.php');
+  }
   
   add_group_tool_option('subgroups', elgg_echo('au_subgroups:group:enable'));
   

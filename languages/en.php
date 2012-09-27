@@ -2,6 +2,7 @@
 
 $english = array(
     'au_subgroups' => "Sub-Groups",
+    'au_subgroups:subgroup' => "Sub-Group",
     'au_subgroups:subgroups' => "Sub-Groups",
     'au_subgroups:group:enable' => "Enable Sub-Groups for this group?",
     'au_subgroups:parent' => "Parent Group",
@@ -15,6 +16,8 @@ $english = array(
     'au_subgroups:deleteoption:delete' => 'Delete all content within this group',
     'au_subgroups:deleteoption:owner' => 'Transfer all content to the original creators',
     'au_subgroups:deleteoption:parent' => 'Transfer all content to the parent group',
+    'au_subgroups:subgroup:of' => "Sub-Group of %s",
+    'au_subgroups:setting:display_subgroups' => 'Show subgroups in standard group listings?',
 );
 					
 add_translation("en",$english);

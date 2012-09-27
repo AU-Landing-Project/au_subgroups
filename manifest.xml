@@ -25,5 +25,16 @@
     <priority>after</priority>
   </requires>
   
+  <suggests>
+    <type>plugin</type>
+    <name>group_tools</name>
+  </suggests>
+  
+  <requires>
+    <type>priority</type>
+    <name>group_tools</name>
+    <priority>after</priority>
+  </requires>
+  
 	<category>Site Admin</category>
 </plugin_manifest>
