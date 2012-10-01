@@ -23,6 +23,10 @@ function au_subgroups_group_permissions($event, $type, $object) {
     return FALSE;
   }
   
+  if ($event == 'create' && elgg_is_active_plugin('group_custom_layout')) {
+    au_subgroups_clone_layout($object, $parent);
+  }
+  
   // we know it's a sub-group, make sure the permissions are that of the parent acl
   if ($object->access_id == $parent->group_acl) {
     return TRUE;

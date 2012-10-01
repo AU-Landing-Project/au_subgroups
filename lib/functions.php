@@ -40,6 +40,47 @@ function au_subgroups_breadcrumb_override($params) {
   }
 }
 
+/**
+ * Clones the custom layout of a parent group, for a newly created subgroup
+ * @param type $group
+ * @param type $parent
+ */
+function au_subgroups_clone_layout($group, $parent) {
+  if (!elgg_is_active_plugin('group_custom_layout') || !group_custom_layout_allow($parent)) {
+    return false;
+  }
+  
+  // get the layout object for the parent
+  if($parent->countEntitiesFromRelationship(GROUP_CUSTOM_LAYOUT_RELATION) <= 0) {
+    return false;
+  }
+  
+  $parentlayout = $parent->getEntitiesFromRelationship(GROUP_CUSTOM_LAYOUT_RELATION);
+  $parentlayout = $parentlayout[0];
+  
+  $layout = new ElggObject();
+	$layout->subtype = GROUP_CUSTOM_LAYOUT_SUBTYPE;
+	$layout->owner_guid = $group->getGUID();
+	$layout->container_guid = $group->getGUID();
+	$layout->access_id = ACCESS_PUBLIC;
+
+	$layout->save();
+  
+  // background image
+  $layout->enable_background = $parentlayout->enable_background;
+  $parentimg = elgg_get_config('dataroot') . 'group_custom_layout/backgrounds/' . $parent->getGUID() . '.jpg';
+  $groupimg = elgg_get_config('dataroot') . 'group_custom_layout/backgrounds/' . $group->getGUID() . '.jpg';
+  if(file_exists($parentimg)) {
+		copy($parentimg, $groupimg);
+	}
+  
+  $layout->enable_colors = $parentlayout->enable_colors;
+  $layout->background_color = $parentlayout->background_color;
+  $layout->border_color = $parentlayout->border_color;
+  $layout->title_color = $parentlayout->title_color;
+  $group->addRelationship($layout->getGUID(), GROUP_CUSTOM_LAYOUT_RELATION);
+}
+
 
 function au_subgroups_delete_entities($result, $getter, $options) {
   $result->delete();
