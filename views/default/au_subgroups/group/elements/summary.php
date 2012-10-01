@@ -15,6 +15,7 @@
   
   echo elgg_echo('au_subgroups:subgroup:of', array($link));
   ?>
+  <br><br>
 </div>
 <?php
   }

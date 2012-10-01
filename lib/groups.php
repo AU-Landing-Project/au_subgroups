@@ -7,6 +7,8 @@
  * List all groups
  */
 function groups_handle_all_page() {
+  $display_subgroups = elgg_get_plugin_setting('display_subgroups', 'au_subgroups');
+  $display_alphabetically = elgg_get_plugin_setting('display_alphabetically', 'au_subgroups');
   $db_prefix = elgg_get_config('dbprefix');
 	// all groups doesn't get link to self
 	elgg_pop_breadcrumb();
@@ -18,13 +20,18 @@ function groups_handle_all_page() {
 
 	switch ($selected_tab) {
 		case 'popular':
-			$content = elgg_list_entities_from_relationship_count(array(
+			$options = array(
 				'type' => 'group',
 				'relationship' => 'member',
 				'inverse_relationship' => false,
 				'full_view' => false,
-        'wheres' => array("NOT EXISTS ( SELECT 1 FROM {$db_prefix}entity_relationships WHERE guid_one = e.guid AND relationship = '" . AU_SUBGROUPS_RELATIONSHIP . "' )")
-			));
+			);
+        
+      if ($display_subgroups != 'yes') {
+        $options['wheres'] = array("NOT EXISTS ( SELECT 1 FROM {$db_prefix}entity_relationships WHERE guid_one = e.guid AND relationship = '" . AU_SUBGROUPS_RELATIONSHIP . "' )");
+      }
+        
+      $content = elgg_list_entities_from_relationship_count($options);
 			if (!$content) {
 				$content = elgg_echo('groups:none');
 			}
@@ -43,11 +50,16 @@ function groups_handle_all_page() {
 			break;
 		case 'newest':
 		default:
-			$content = elgg_list_entities(array(
+			$options = array(
 				'type' => 'group',
-				'full_view' => false,
-        'wheres' => array("NOT EXISTS ( SELECT 1 FROM {$db_prefix}entity_relationships WHERE guid_one = e.guid AND relationship = '" . AU_SUBGROUPS_RELATIONSHIP . "' )")
-			));
+				'full_view' => false
+			);
+      
+      if ($display_subgroups != 'yes') {
+        $options['wheres'] = array("NOT EXISTS ( SELECT 1 FROM {$db_prefix}entity_relationships WHERE guid_one = e.guid AND relationship = '" . AU_SUBGROUPS_RELATIONSHIP . "' )");
+      }
+        
+      $content = elgg_list_entities($options);
 			if (!$content) {
 				$content = elgg_echo('groups:none');
 			}
@@ -105,74 +117,14 @@ function groups_search_page() {
  * List owned groups
  */
 function groups_handle_owned_page() {
-  $db_prefix = elgg_get_config('dbprefix');
-	$page_owner = elgg_get_page_owner_entity();
-
-	if ($page_owner->guid == elgg_get_logged_in_user_guid()) {
-		$title = elgg_echo('groups:owned');
-	} else {
-		$title = elgg_echo('groups:owned:user', array($page_owner->name));
-	}
-	elgg_push_breadcrumb($title);
-
-	elgg_register_title_button();
-
-	$content = elgg_list_entities(array(
-		'type' => 'group',
-		'owner_guid' => elgg_get_page_owner_guid(),
-		'full_view' => false,
-    'wheres' => array("NOT EXISTS ( SELECT 1 FROM {$db_prefix}entity_relationships WHERE guid_one = e.guid AND relationship = '" . AU_SUBGROUPS_RELATIONSHIP . "' )")
-	));
-	if (!$content) {
-		$content = elgg_echo('groups:none');
-	}
-
-	$params = array(
-		'content' => $content,
-		'title' => $title,
-		'filter' => '',
-	);
-	$body = elgg_view_layout('content', $params);
-
-	echo elgg_view_page($title, $body);
+  au_subgroups_handle_owned_page();
 }
 
 /**
  * List groups the user is memober of
  */
 function groups_handle_mine_page() {
-  $db_prefix = elgg_get_config('dbprefix');
-	$page_owner = elgg_get_page_owner_entity();
-
-	if ($page_owner->guid == elgg_get_logged_in_user_guid()) {
-		$title = elgg_echo('groups:yours');
-	} else {
-		$title = elgg_echo('groups:user', array($page_owner->name));
-	}
-	elgg_push_breadcrumb($title);
-
-	elgg_register_title_button();
-
-	$content = elgg_list_entities_from_relationship_count(array(
-		'type' => 'group',
-		'relationship' => 'member',
-		'relationship_guid' => elgg_get_page_owner_guid(),
-		'inverse_relationship' => false,
-		'full_view' => false,
-    'wheres' => array("NOT EXISTS ( SELECT 1 FROM {$db_prefix}entity_relationships WHERE guid_one = e.guid AND relationship = '" . AU_SUBGROUPS_RELATIONSHIP . "' )")
-	));
-	if (!$content) {
-		$content = elgg_echo('groups:none');
-	}
-
-	$params = array(
-		'content' => $content,
-		'title' => $title,
-		'filter' => '',
-	);
-	$body = elgg_view_layout('content', $params);
-
-	echo elgg_view_page($title, $body);
+  au_subgroups_handle_mine_page();
 }
 
 /**

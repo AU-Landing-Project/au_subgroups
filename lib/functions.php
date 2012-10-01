@@ -116,6 +116,168 @@ function au_subgroups_get_subgroups($group, $limit = 10, $sortbytitle = false) {
 }
 
 
+function au_subgroups_handle_mine_page() {
+  $display_subgroups = elgg_get_plugin_setting('display_subgroups', 'au_subgroups');
+  $display_alphabetically = elgg_get_plugin_setting('display_alphabetically', 'au_subgroups');
+  $db_prefix = elgg_get_config('dbprefix');
+	$page_owner = elgg_get_page_owner_entity();
+
+	if ($page_owner->guid == elgg_get_logged_in_user_guid()) {
+		$title = elgg_echo('groups:yours');
+	} else {
+		$title = elgg_echo('groups:user', array($page_owner->name));
+	}
+	elgg_push_breadcrumb($title);
+
+	elgg_register_title_button();
+
+	$options = array(
+		'type' => 'group',
+		'relationship' => 'member',
+		'relationship_guid' => elgg_get_page_owner_guid(),
+		'inverse_relationship' => false,
+		'full_view' => false,
+	);
+    
+  if ($display_subgroups != 'yes') {
+    $options['wheres'] = array("NOT EXISTS ( SELECT 1 FROM {$db_prefix}entity_relationships WHERE guid_one = e.guid AND relationship = '" . AU_SUBGROUPS_RELATIONSHIP . "' )");
+  }
+  
+  if ($display_alphabetically != 'no') {
+    $options['joins'] = array("JOIN {$db_prefix}groups_entity ge ON e.guid = ge.guid");
+    $options['order_by'] = 'ge.name ASC';
+  }
+    
+  $content = elgg_list_entities_from_relationship($options);
+	if (!$content) {
+		$content = elgg_echo('groups:none');
+	}
+
+	$params = array(
+		'content' => $content,
+		'title' => $title,
+		'filter' => '',
+	);
+	$body = elgg_view_layout('content', $params);
+
+	echo elgg_view_page($title, $body);
+}
+
+
+function au_subgroups_handle_openclosed_tabs() {
+  $display_subgroups = elgg_get_plugin_setting('display_subgroups', 'au_subgroups');
+  $display_alphabetically = elgg_get_plugin_setting('display_alphabetically', 'au_subgroups');
+  $db_prefix = elgg_get_config('dbprefix');
+  // all groups doesn't get link to self
+	elgg_pop_breadcrumb();
+	elgg_push_breadcrumb(elgg_echo('groups'));
+	
+	elgg_register_title_button();
+	
+	$selected_tab = get_input('filter');
+
+	// default group options
+	$group_options = array(
+		"type" => "group", 
+		"full_view" => false,
+	);
+  
+  if ($display_subgroups != 'yes') {
+    $group_options['wheres'] = array("NOT EXISTS ( SELECT 1 FROM {$db_prefix}entity_relationships WHERE guid_one = e.guid AND relationship = '" . AU_SUBGROUPS_RELATIONSHIP . "' )");
+  }
+  
+  if ($display_alphabetically != 'no') {
+    $group_options['joins'] = array("JOIN {$db_prefix}groups_entity ge ON e.guid = ge.guid");
+    $group_options['order_by'] = 'ge.name ASC';
+  }
+	
+	switch ($selected_tab) {
+		case "open":
+			$group_options["metadata_name_value_pairs"] = array(
+				"name" => "membership",
+				"value" => ACCESS_PUBLIC
+			);
+			
+			break;
+		case "closed":
+			$group_options["metadata_name_value_pairs"] = array(
+				"name" => "membership",
+				"value" => ACCESS_PUBLIC,
+				"operand" => "<>"
+			);
+			
+			break;
+    
+    case "alpha":
+			$dbprefix = elgg_get_config("dbprefix");
+			
+			$group_options["joins"]	= array("JOIN " . $dbprefix . "groups_entity ge ON e.guid = ge.guid");
+			$group_options["order_by"] = "ge.name ASC";
+			
+			break;
+	}
+	
+	if(!($content = elgg_list_entities_from_metadata($group_options))){
+		$content = elgg_echo("groups:none");
+	}
+	
+	$filter = elgg_view('groups/group_sort_menu', array('selected' => $selected_tab));
+
+	$sidebar = elgg_view('groups/sidebar/find');
+	$sidebar .= elgg_view('groups/sidebar/featured');
+
+	$params = array(
+		'content' => $content,
+		'sidebar' => $sidebar,
+		'filter' => $filter,
+	);
+	
+	$body = elgg_view_layout('content', $params);
+
+	echo elgg_view_page(elgg_echo('groups:all'), $body);
+}
+
+
+function au_subgroups_handle_owned_page() {
+  $db_prefix = elgg_get_config('dbprefix');
+	$page_owner = elgg_get_page_owner_entity();
+
+	if ($page_owner->guid == elgg_get_logged_in_user_guid()) {
+		$title = elgg_echo('groups:owned');
+	} else {
+		$title = elgg_echo('groups:owned:user', array($page_owner->name));
+	}
+	elgg_push_breadcrumb($title);
+
+	elgg_register_title_button();
+
+	$options = array(
+		'type' => 'group',
+		'owner_guid' => elgg_get_page_owner_guid(),
+		'full_view' => false,
+	);
+    
+  $options['joins'] = array("JOIN {$db_prefix}groups_entity ge ON e.guid = ge.guid");
+  $options['order_by'] = 'ge.name asc';
+  
+  $options['wheres'] = array("NOT EXISTS ( SELECT 1 FROM {$db_prefix}entity_relationships WHERE guid_one = e.guid AND relationship = '" . AU_SUBGROUPS_RELATIONSHIP . "' )");
+  
+  $content = elgg_list_entities($options);
+	if (!$content) {
+		$content = elgg_echo('groups:none');
+	}
+
+	$params = array(
+		'content' => $content,
+		'title' => $title,
+		'filter' => '',
+	);
+	$body = elgg_view_layout('content', $params);
+
+	echo elgg_view_page($title, $body);
+}
+
+
 function au_subgroups_list_subgroups($group, $limit = 10, $sortbytitle = false) {
   $options = array(
     'types' => array('group'),

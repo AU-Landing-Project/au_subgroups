@@ -113,6 +113,21 @@ function au_subgroups_groups_router($hook, $type, $return, $params) {
       }
     }
   }
+  
+  // need to redo closed/open tabs provided by group_tools - if it's installed
+  if ($return['segments'][0] == 'all' && elgg_is_active_plugin('group_tools')) {
+    $filter = get_input('filter', false);
+    
+    if(empty($filter) && ($default_filter = elgg_get_plugin_setting("group_listing", "group_tools"))){
+			$filter = $default_filter;
+			set_input("filter", $default_filter);
+		}
+    
+    if(in_array($filter, array("open", "closed", "alpha"))){
+      au_subgroups_handle_openclosed_tabs();
+      return true;
+		}
+  }
 }
 
 

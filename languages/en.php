@@ -17,6 +17,7 @@ $english = array(
     'au_subgroups:deleteoption:owner' => 'Transfer all content to the original creators',
     'au_subgroups:deleteoption:parent' => 'Transfer all content to the parent group',
     'au_subgroups:subgroup:of' => "Sub-Group of %s",
+    'au_subgroups:setting:display_alphabetically' => "Display personal group listings alphabetically?",
     'au_subgroups:setting:display_subgroups' => 'Show subgroups in standard group listings?',
 );
 					

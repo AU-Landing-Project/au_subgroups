@@ -5,7 +5,6 @@
  * access only by parent group acl
  */
 function au_subgroups_group_permissions($event, $type, $object) {
-  
   // if we have an input, then we're setting the parent
   $parent_guid = get_input('au_subgroups_parent_guid', false);
   if ($parent_guid !== false) {

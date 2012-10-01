@@ -22,11 +22,9 @@ function au_subgroups_init() {
   elgg_extend_view('forms/groups/edit', 'forms/au_subgroups/edit');
   elgg_extend_view('navigation/breadcrumbs', 'au_subgroups/breadcrumb_override', 1);
   elgg_extend_view('group/elements/summary', 'au_subgroups/group/elements/summary');
-  
-  $display_subgroups = elgg_get_plugin_setting('display_subgroups', 'au_subgroups');
-  if ($display_subgroups != 'yes') {
-    elgg_register_library('elgg:groups', elgg_get_plugins_path() . 'au_subgroups/lib/groups.php');
-  }
+
+  // replace the existing groups library so we can push some display options
+  elgg_register_library('elgg:groups', elgg_get_plugins_path() . 'au_subgroups/lib/groups.php');
   
   add_group_tool_option('subgroups', elgg_echo('au_subgroups:group:enable'));
   
@@ -34,7 +32,7 @@ function au_subgroups_init() {
 	elgg_register_plugin_hook_handler('register', 'menu:owner_block', 'au_subgroups_owner_block_menu');
   
   // route some urls that go through 'groups' handler
-  elgg_register_plugin_hook_handler('route', 'groups', 'au_subgroups_groups_router');
+  elgg_register_plugin_hook_handler('route', 'groups', 'au_subgroups_groups_router', 499);
   
   // make sure river entries have the correct access
   elgg_register_plugin_hook_handler('creating', 'river', 'au_subgroups_river_permissions');
