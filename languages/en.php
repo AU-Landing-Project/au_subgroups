@@ -19,6 +19,7 @@ $english = array(
     'au_subgroups:subgroup:of' => "Sub-Group of %s",
     'au_subgroups:setting:display_alphabetically' => "Display personal group listings alphabetically?",
     'au_subgroups:setting:display_subgroups' => 'Show subgroups in standard group listings?',
+    'au_subgroups:setting:display_featured' => 'Show featured groups sidebar on personal group listings?',
     
     /*
      * Widget

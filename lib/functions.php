@@ -193,9 +193,16 @@ function au_subgroups_handle_mine_page() {
 	if (!$content) {
 		$content = elgg_echo('groups:none');
 	}
+  
+  $sidebar = '';
+  $display_sidebar = elgg_get_plugin_setting('display_featured', 'au_subgroups');
+  if ($display_sidebar == 'yes') {
+    $sidebar = elgg_view('groups/sidebar/featured');
+  }
 
 	$params = array(
 		'content' => $content,
+    'sidebar' => $sidebar,
 		'title' => $title,
 		'filter' => '',
 	);
@@ -307,9 +314,16 @@ function au_subgroups_handle_owned_page() {
 	if (!$content) {
 		$content = elgg_echo('groups:none');
 	}
+  
+  $sidebar = '';
+  $display_sidebar = elgg_get_plugin_setting('display_featured', 'au_subgroups');
+  if ($display_sidebar == 'yes') {
+    $sidebar = elgg_view('groups/sidebar/featured');
+  }
 
 	$params = array(
 		'content' => $content,
+    'sidebar' => $sidebar,
 		'title' => $title,
 		'filter' => '',
 	);
