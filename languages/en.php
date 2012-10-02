@@ -19,6 +19,15 @@ $english = array(
     'au_subgroups:subgroup:of' => "Sub-Group of %s",
     'au_subgroups:setting:display_alphabetically' => "Display personal group listings alphabetically?",
     'au_subgroups:setting:display_subgroups' => 'Show subgroups in standard group listings?',
+    
+    /*
+     * Widget
+     */
+    'au_subgroups:widget:order' => 'Order results by',
+    'au_subgroups:option:default' => 'Time Created',
+    'au_subgroups:option:alpha' => 'Alphabetical',
+    'au_subgroups:widget:numdisplay' => 'Number of subgroups to display',
+    'au_subgroups:widget:description' => 'List subgroups for this group'
 );
 					
 add_translation("en",$english);

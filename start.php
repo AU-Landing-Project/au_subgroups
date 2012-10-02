@@ -22,6 +22,7 @@ function au_subgroups_init() {
   elgg_extend_view('forms/groups/edit', 'forms/au_subgroups/edit');
   elgg_extend_view('navigation/breadcrumbs', 'au_subgroups/breadcrumb_override', 1);
   elgg_extend_view('group/elements/summary', 'au_subgroups/group/elements/summary');
+  elgg_extend_view('groups/tool_latest', 'au_subgroups/group_module');
 
   // replace the existing groups library so we can push some display options
   elgg_register_library('elgg:groups', elgg_get_plugins_path() . 'au_subgroups/lib/groups.php');
@@ -42,6 +43,9 @@ function au_subgroups_init() {
   
   // sort out what happens when a parent group is deleted
   elgg_register_plugin_hook_handler('action', 'groups/delete', 'au_subgroups_delete_group');
+  
+  // register our widget
+  elgg_register_widget_type('au_subgroups', elgg_echo('au_subgroups'), elgg_echo('au_subgroups:widget:description'), 'groups');
 }
 
 

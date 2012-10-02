@@ -1,0 +1,6 @@
+== VERSION HISTORY ==
+
+x.x
+
+1.0 (10/02/2012):
+ - initial release
