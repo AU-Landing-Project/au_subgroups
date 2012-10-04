@@ -71,6 +71,45 @@ function au_subgroups_group_canedit($hook, $type, $return, $params) {
   }
 }
 
+
+/**
+ * prevent users from being invited to subgroups they can't join
+ */
+function au_subgroups_group_invite($hook, $type, $return, $params) {
+  $user_guid = get_input('user_guid');
+  $group_guid = get_input('group_guid');
+  $group = get_entity($group_guid);
+  
+  $parent = au_subgroups_get_parent_group($group);
+  
+  // if $parent, then this is a subgroup they're being invited to
+  // make sure they're a member of the parent
+  if ($parent) {
+    if (!is_array($user_guid)) {
+      $user_guid = array($user_guid);
+    }
+  
+    $invalid_users = array();
+    foreach($user_guid as $guid) {
+      $user = get_user($guid);
+      if ($user && !$parent->isMember($user)) {
+        $invalid_users[] = $user;
+      }
+    }
+    
+    if (count($invalid_users)) {
+      $error_suffix = "<ul>";
+      foreach($invalid_users as $user) {
+        $error_suffix .= "<li>{$user->name}</li>";
+      }
+      $error_suffix .= "</ul>";
+      
+      register_error(elgg_echo('au_subgroups:error:invite') . $error_suffix);
+      return false;
+    }
+  }
+}
+
 /**
  * re/routes some urls that go through the groups handler
  */
@@ -138,7 +177,7 @@ function au_subgroups_river_permissions($hook, $type, $return, $params) {
   
   if ($parent) {
     // it is a group, and it has a parent
-    $return['access_id'] = $parent->group_acl;
+    $return['access_id'] = $group->access_id;
   }
   
   return $return;
@@ -153,7 +192,7 @@ function au_subgroups_owner_block_menu($hook, $type, $return, $params) {
     $section = 'z-au_subgroups';
     
     // link to subgroups page
-    if ($params['entity']->subgroups_enable != "no" && $params['entity']->isMember()) {
+    if ($params['entity']->subgroups_enable != "no") {
       $url = "groups/subgroups/{$params['entity']->guid}/all";
       $item = new ElggMenuItem('au_subgroups', elgg_echo('au_subgroups:subgroups'), $url);
       $item->setSection($section);

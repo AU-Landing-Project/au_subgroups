@@ -44,6 +44,9 @@ function au_subgroups_init() {
   // sort out what happens when a parent group is deleted
   elgg_register_plugin_hook_handler('action', 'groups/delete', 'au_subgroups_delete_group');
   
+  // prevent users from being invited into a subgroup they can't join
+  elgg_register_plugin_hook_handler('action', 'groups/invite', 'au_subgroups_group_invite');
+  
   // register our widget
   elgg_register_widget_type('au_subgroups', elgg_echo('au_subgroups'), elgg_echo('au_subgroups:widget:description'), 'groups');
 }
