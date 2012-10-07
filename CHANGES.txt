@@ -2,11 +2,13 @@
 
 x.x
 
-1.1 (10/02/2012):
+1.1 (10/06/2012):
  - added option to show featured groups on personal listing pages
  - prevents users from being invited to subgroups when they're not members of the parent group
  - fixes subgroup creation link on default group module
  - added some visibility control for subgroups
+ - fixed issue with 'priority' settings in manifest
+ - added screenshots
 
 1.0 (10/02/2012):
  - initial release

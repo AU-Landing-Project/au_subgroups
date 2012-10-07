@@ -21,7 +21,7 @@
   
   <requires>
     <type>priority</type>
-    <name>groups</name>
+    <plugin>groups</plugin>
     <priority>after</priority>
   </requires>
   
@@ -32,9 +32,29 @@
   
   <requires>
     <type>priority</type>
-    <name>group_tools</name>
+    <plugin>group_tools</plugin>
     <priority>after</priority>
   </requires>
+  
+  <screenshot>
+    <description>Group pages have a link to view subgroups of that group</description>
+    <path>graphics/subgroups1.png</path>
+  </screenshot>
+  
+  <screenshot>
+    <description>List of subgroups</description>
+    <path>graphics/subgroups2.png</path>
+  </screenshot>
+  
+  <screenshot>
+    <description>Subgroups can have visibility as permissive as the parent, with the option of 'members of the parent group'</description>
+    <path>graphics/subgroups3.png</path>
+  </screenshot>
+  
+  <screenshot>
+    <description>Widget and group module for listing subgroups</description>
+    <path>graphics/subgroups4.png</path>
+  </screenshot>
   
 	<category>Site Admin</category>
 </plugin_manifest>
