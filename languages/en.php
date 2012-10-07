@@ -21,6 +21,7 @@ $english = array(
     'au_subgroups:setting:display_subgroups' => 'Show subgroups in standard group listings?',
     'au_subgroups:setting:display_featured' => 'Show featured groups sidebar on personal group listings?',
     'au_subgroups:error:invite' => "Action has been cancelled - the following users are not members of the parent group and cannot be invited/added.",
+    'au_subgroups:option:parent:members' => "Members of the parent group",
     
     /*
      * Widget

@@ -1,43 +1,98 @@
 <?php
 
-/**
- * when groups are created/updated, make sure subgroups have
- * access only by parent group acl
- */
-function au_subgroups_group_permissions($event, $type, $object) {
+function au_subgroups_add_parent($event, $type, $object) {  
   // if we have an input, then we're setting the parent
   $parent_guid = get_input('au_subgroups_parent_guid', false);
   if ($parent_guid !== false) {
     au_subgroups_set_parent_group($object->guid, $parent_guid);
   }
   
-  $parent = au_subgroups_get_parent_group($object);
-  
-  if (!$parent) {
-    return TRUE;
-  }
-  
+  $parent = get_entity($parent_guid);
   // subgroups aren't enabled, how are we creating a new subgroup?
-  if ($parent->enable_subgroups == 'no' && $type == 'create') {
+  if (elgg_instanceof($parent, 'group') && $parent->enable_subgroups == 'no') {
     register_error(elgg_echo('au_subtypes:error:create:disabled'));
     return FALSE;
   }
-  
-  if ($event == 'create' && elgg_is_active_plugin('group_custom_layout')) {
-    au_subgroups_clone_layout($object, $parent);
+}
+
+function au_subgroups_clone_layout_on_create($event, $type, $object) {
+  if (elgg_is_active_plugin('group_custom_layout')) {
+    $parent = au_subgroups_get_parent_group($object);
+    
+    if ($parent) {
+      au_subgroups_clone_layout($object, $parent);
+    }
   }
+}
+
+/**
+ * when groups are created/updated, make sure subgroups have
+ * access only by parent group acl
+ */
+function au_subgroups_group_visibility($event, $type, $object) {
+  $parent = au_subgroups_get_parent_group($object);
   
-  // we know it's a sub-group, make sure the permissions are that of the parent acl
-  if ($object->access_id == $parent->group_acl) {
-    return TRUE;
+  // make sure the visibility is what was set on the form
+  $vis = get_input('vis', false);
+  
+  if ($vis !== false) { // this makes sure we only update access when it's done via form
+    if ($vis == ACCESS_PRIVATE) {
+      $access_id = $object->group_acl;
+    }
+    elseif ($vis == 'parent_group_acl') {
+      $access_id = $parent->group_acl;
+    }
+    else {
+      $access_id = $vis;
+    }
+    
+    if (!elgg_get_config('au_subgroups_visupdate')) {
+      // config ensures we only directly modify db for top level update
+      // as that's the one that follows the form input
+      elgg_set_config('au_subgroups_visupdate', true);
+      // we need to update it - first in memory, then in the db
+      $object->access_id = $access_id;
+      $q = "UPDATE " . elgg_get_config('dbprefix') . "entities SET access_id = {$access_id} WHERE guid = {$object->guid}";
+      update_data($q);
+      // make sure our metadata follows suit
+      metadata_update('update', 'group', $object);
+    }
+   
+    // if this group has subgroups, and we're making the visibility more restrictive
+    // we need to check the subgroups to make sure they're not more visible than this group
+    set_time_limit(0); // this is recursive and could take a while
+    
+    $children = au_subgroups_get_subgroups($object, 0);
+    
+    if ($children) {
+      foreach($children as $child) {        
+        switch ($access_id) {
+          case ACCESS_PUBLIC:
+              // do nothing, most permissive access
+            break;
+
+          case ACCESS_LOGGED_IN:
+              // if child access is public, bump it up
+              if ($child->access_id == ACCESS_PUBLIC) {
+                $child->access_id = ACCESS_LOGGED_IN;
+                $child->save();
+              }
+            break;
+          
+          default:
+              // two options here, group->group_acl = hidden
+              // or parent->group_acl = visible to parent group members
+              // if the child is more permissive than the parent, we're changing the child to 
+              // the next level up - in this case, visible to parent group
+              if (!in_array($child->access_id, array($child->group_acl, $object->group_acl))) {
+                $child->access_id = $object->group_acl;
+                $child->save();
+              }
+            break;
+        }
+      }
+    }
   }
-  
-  // we need to update it - first in memory, then in the db
-  $object->access_id = $parent->group_acl;
-  $q = "UPDATE " . elgg_get_config('dbprefix') . "entities SET access_id = {$parent->group_acl} WHERE guid = {$object->guid}";
-  update_data($q);
-  // make sure our metadata follows suit
-  metadata_update('update', 'group', $object);
 }
 
 /**

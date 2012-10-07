@@ -27,11 +27,16 @@ if (!$content) {
 	$content = '<p>' . elgg_echo('au_subgroups:nogroups') . '</p>';
 }
 
-$new_link = elgg_view('output/url', array(
-	'href' => "blog/add/$group->guid",
-	'text' => elgg_echo('blog:write'),
-	'is_trusted' => true,
-));
+if ($group->canEdit()) {
+  $new_link = elgg_view('output/url', array(
+    'href' => "groups/subgroups/add/$group->guid",
+    'text' => elgg_echo('au_subgroups:add:subgroup'),
+    'is_trusted' => true,
+  ));
+}
+else {
+  $new_link = '';
+}
 
 echo elgg_view('groups/profile/module', array(
 	'title' => elgg_echo('au_subgroups'),
