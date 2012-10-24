@@ -15,9 +15,9 @@ elgg_register_event_handler('update', 'group', 'au_subgroups_group_visibility');
 elgg_register_event_handler('create', 'member', 'au_subgroups_join_group');
 elgg_register_event_handler('leave', 'group', 'au_subgroups_leave_group');
 // break up the create/update events to be more manageable
-elgg_register_event_handler('create', 'group', 'au_subgroups_add_parent');
-elgg_register_event_handler('create', 'group', 'au_subgroups_clone_layout_on_create');
-elgg_register_event_handler('create', 'group', 'au_subgroups_group_visibility');
+elgg_register_event_handler('create', 'group', 'au_subgroups_add_parent', 1000);
+elgg_register_event_handler('create', 'group', 'au_subgroups_clone_layout_on_create', 1000);
+elgg_register_event_handler('create', 'group', 'au_subgroups_group_visibility', 1000);
 
 function au_subgroups_init() {
   // add in our own css
@@ -52,6 +52,39 @@ function au_subgroups_init() {
   
   // register our widget
   elgg_register_widget_type('au_subgroups', elgg_echo('au_subgroups'), elgg_echo('au_subgroups:widget:description'), 'groups');
+  
+  // fix some problems
+  if (elgg_is_admin_logged_in()) {
+    run_function_once('au_subgroups_bugfix_20121024a');
+  }
 }
 
 
+function au_subgroups_bugfix_20121024a() {
+  $options = array(
+     'types' => 'group',
+     'limit' => 0
+  );
+  
+  // using ElggBatch because there may be many, many groups in the installation
+  // try to avoid oom errors
+  $batch = new ElggBatch('elgg_get_entities', $options, 'au_subgroups_fix_acls', 50);
+}
+
+function au_subgroups_fix_acls_20121024a($result, $getter, $options) {
+  if ($result->group_acl === NULL) {
+    // group has no acl... create it and add all the members
+    $ac_name = elgg_echo('groups:group') . ": " . $result->name;
+    $group_acl = create_access_collection($ac_name, $result->guid);
+		$result->group_acl = $group_acl;
+    
+    // now add all members of the group to the acl
+    $members = $result->getMembers(0, 0, false);
+    
+    if (is_array($members) && count($members)) {
+      foreach ($members as $member) {
+        add_user_to_access_collection($member->guid, $group_acl);
+      }
+    }
+  }
+}

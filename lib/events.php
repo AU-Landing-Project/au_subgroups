@@ -36,20 +36,49 @@ function au_subgroups_group_visibility($event, $type, $object) {
   $vis = get_input('vis', false);
   
   if ($vis !== false) { // this makes sure we only update access when it's done via form
-    if ($vis == ACCESS_PRIVATE) {
-      $access_id = $object->group_acl;
+
+    switch ($vis) {
+      case 'parent_group_acl':
+        $access_id = $parent->group_acl;
+        break;
+      
+      case ACCESS_PRIVATE:
+        $access_id = $object->group_acl;
+        break;
+      
+      default:
+        $access_id = $vis;
+        break;
     }
-    elseif ($vis == 'parent_group_acl') {
-      $access_id = $parent->group_acl;
-    }
-    else {
-      $access_id = $vis;
-    }
+    /*
+    global $CONFIG;
+    echo "events = <pre>" . print_r($CONFIG->events['create']['group'],1) . "</pre>";
+    echo "vis = $vis<br>";
+    echo "access_id = $access_id<br>";
+    echo "object = <pre>" . print_r($object,1) . "</pre><br>";
+    echo "object->group_acl = " . $object->group_acl . "<br>";
+    echo "parent = <pre>" . print_r($parent,1) . "</pre><br>";
+    echo "parent->group_acl = " . $parent->group_acl . "<br>";
+    exit;
+    */
+    
+    /*
+     * Here we have some trickiness, because save is called twice with the visibility being
+     * reset the second time.  So we have to make sure we're only updating the visibility
+     * of the original (not a subgroup or parent) on subsequent calls.
+     * 
+     * To do this we're setting a temporary config variable to say that yes, we've been here once
+     * and pass the guid of the group we're concerned with in another config variable.
+     * That way we know only to update the vis of the matching guid
+     */
     
     if (!elgg_get_config('au_subgroups_visupdate')) {
-      // config ensures we only directly modify db for top level update
-      // as that's the one that follows the form input
+      // this is the first pass, lets mark it and save the guid of the group we care about
       elgg_set_config('au_subgroups_visupdate', true);
+      elgg_set_config('au_subgroups_vis_guid', $object->guid);
+    }
+    
+    if (elgg_get_config('au_subgroups_vis_guid') == $object->guid) {
       // we need to update it - first in memory, then in the db
       $object->access_id = $access_id;
       $q = "UPDATE " . elgg_get_config('dbprefix') . "entities SET access_id = {$access_id} WHERE guid = {$object->guid}";
