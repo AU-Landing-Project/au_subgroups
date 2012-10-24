@@ -50,17 +50,7 @@ function au_subgroups_group_visibility($event, $type, $object) {
         $access_id = $vis;
         break;
     }
-    /*
-    global $CONFIG;
-    echo "events = <pre>" . print_r($CONFIG->events['create']['group'],1) . "</pre>";
-    echo "vis = $vis<br>";
-    echo "access_id = $access_id<br>";
-    echo "object = <pre>" . print_r($object,1) . "</pre><br>";
-    echo "object->group_acl = " . $object->group_acl . "<br>";
-    echo "parent = <pre>" . print_r($parent,1) . "</pre><br>";
-    echo "parent->group_acl = " . $parent->group_acl . "<br>";
-    exit;
-    */
+
     
     /*
      * Here we have some trickiness, because save is called twice with the visibility being

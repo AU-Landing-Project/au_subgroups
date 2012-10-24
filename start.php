@@ -10,14 +10,6 @@ require_once 'lib/hooks.php';
 
 elgg_register_event_handler('init', 'system', 'au_subgroups_init');
 
-// after group creation or editing we need to check the permissions
-elgg_register_event_handler('update', 'group', 'au_subgroups_group_visibility');
-elgg_register_event_handler('create', 'member', 'au_subgroups_join_group');
-elgg_register_event_handler('leave', 'group', 'au_subgroups_leave_group');
-// break up the create/update events to be more manageable
-elgg_register_event_handler('create', 'group', 'au_subgroups_add_parent', 1000);
-elgg_register_event_handler('create', 'group', 'au_subgroups_clone_layout_on_create', 1000);
-elgg_register_event_handler('create', 'group', 'au_subgroups_group_visibility', 1000);
 
 function au_subgroups_init() {
   // add in our own css
@@ -26,6 +18,16 @@ function au_subgroups_init() {
   elgg_extend_view('navigation/breadcrumbs', 'au_subgroups/breadcrumb_override', 1);
   elgg_extend_view('group/elements/summary', 'au_subgroups/group/elements/summary');
   elgg_extend_view('groups/tool_latest', 'au_subgroups/group_module');
+  elgg_extend_view('groups/sidebar/members', 'au_subgroups/sidebar/subgroups');
+  
+  // after group creation or editing we need to check the permissions
+  elgg_register_event_handler('update', 'group', 'au_subgroups_group_visibility');
+  elgg_register_event_handler('create', 'member', 'au_subgroups_join_group');
+  elgg_register_event_handler('leave', 'group', 'au_subgroups_leave_group');
+  // break up the create/update events to be more manageable
+  elgg_register_event_handler('create', 'group', 'au_subgroups_add_parent', 1000);
+  elgg_register_event_handler('create', 'group', 'au_subgroups_clone_layout_on_create', 1000);
+  elgg_register_event_handler('create', 'group', 'au_subgroups_group_visibility', 1000);
 
   // replace the existing groups library so we can push some display options
   elgg_register_library('elgg:groups', elgg_get_plugins_path() . 'au_subgroups/lib/groups.php');
