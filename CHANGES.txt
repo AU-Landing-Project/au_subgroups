@@ -2,6 +2,11 @@
 
 x.x
 
+1.2 (10/24/2012):
+ - fixed an issue with subgroup members-only visibility
+ - fixed an issue with subgroup acls
+ - added subgroup preview in sidebar
+
 1.1 (10/06/2012):
  - added option to show featured groups on personal listing pages
  - prevents users from being invited to subgroups when they're not members of the parent group
