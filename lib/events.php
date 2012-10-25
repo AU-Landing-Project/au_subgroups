@@ -151,3 +151,20 @@ function au_subgroups_leave_group($event, $type, $params) {
     leave_group($guid, $params['user']->guid);
   }
 }
+
+
+
+function au_subgroups_pagesetup() {
+  if (elgg_get_context() == 'group_profile' || elgg_get_context() == 'au_subgroups') {
+    $group = elgg_get_page_owner_entity();
+    if (elgg_instanceof($group, 'group') && $group->canEdit()) {
+      // register our title menu
+      elgg_register_menu_item('title', array(
+        'name' => 'add_subgroup',
+        'href' => "groups/subgroups/add/{$group->guid}",
+        'text' => elgg_echo('au_subgroups:add:subgroup'),
+        'class' => 'elgg-button elgg-button-action'
+      ));
+    }
+  }
+}

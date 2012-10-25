@@ -183,30 +183,4 @@ function au_subgroups_river_permissions($hook, $type, $return, $params) {
   return $return;
 }
 
-/**
- * Add a menu item to an ownerblock
- */
-function au_subgroups_owner_block_menu($hook, $type, $return, $params) {
-	if (elgg_instanceof($params['entity'], 'group')) {
-    // sections ordered alphabetically, we want ours last
-    $section = 'z-au_subgroups';
-    
-    // link to subgroups page
-    if ($params['entity']->subgroups_enable != "no") {
-      $url = "groups/subgroups/{$params['entity']->guid}/all";
-      $item = new ElggMenuItem('au_subgroups', elgg_echo('au_subgroups:subgroups'), $url);
-      $item->setSection($section);
-      $return[] = $item;
-    }
-    
-    // link to parent group page
-    if ($parent = au_subgroups_get_parent_group($params['entity'])) {
-      $item = new ElggMenuItem('au_subgroups_parent', elgg_echo('au_subgroups:parent'), $parent->getURL());
-      $item->setSection($section);
-      $return[] = $item;
-    }
-	}
-
-	return $return;
-}
 

@@ -2,6 +2,11 @@
 
 x.x
 
+1.3 (10/25/2012):
+ - removed menu block links in favour of sidebar mini view
+ - removed 'add subgroup' link from sidebar
+ - added 'add subgroup' link to header menu
+
 1.2 (10/24/2012):
  - fixed an issue with subgroup members-only visibility
  - fixed an issue with subgroup acls

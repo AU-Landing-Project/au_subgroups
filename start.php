@@ -28,14 +28,12 @@ function au_subgroups_init() {
   elgg_register_event_handler('create', 'group', 'au_subgroups_add_parent', 1000);
   elgg_register_event_handler('create', 'group', 'au_subgroups_clone_layout_on_create', 1000);
   elgg_register_event_handler('create', 'group', 'au_subgroups_group_visibility', 1000);
+  elgg_register_event_handler('pagesetup', 'system', 'au_subgroups_pagesetup');
 
   // replace the existing groups library so we can push some display options
   elgg_register_library('elgg:groups', elgg_get_plugins_path() . 'au_subgroups/lib/groups.php');
   
   add_group_tool_option('subgroups', elgg_echo('au_subgroups:group:enable'));
-  
-  // add links to group owner_block
-	elgg_register_plugin_hook_handler('register', 'menu:owner_block', 'au_subgroups_owner_block_menu');
   
   // route some urls that go through 'groups' handler
   elgg_register_plugin_hook_handler('route', 'groups', 'au_subgroups_groups_router', 499);
