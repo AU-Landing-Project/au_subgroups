@@ -155,7 +155,7 @@ function au_subgroups_leave_group($event, $type, $params) {
 
 
 function au_subgroups_pagesetup() {
-  if (elgg_get_context() == 'group_profile' || elgg_get_context() == 'au_subgroups') {
+  if (elgg_get_context() == 'au_subgroups') {
     $group = elgg_get_page_owner_entity();
     if (elgg_instanceof($group, 'group') && $group->canEdit()) {
       // register our title menu
