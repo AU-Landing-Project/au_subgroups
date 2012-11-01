@@ -1,7 +1,12 @@
 <?php
 
+if ($vars['entity']->subgroups_enable == 'no') {
+  // no subgroups allowed
+  return;
+}
+
 $all_link = elgg_view('output/url', array(
-	'href' => 'groups/subgroups/' . $vars['entity']->guid . '/all',
+	'href' => 'groups/subgroups/list/' . $vars['entity']->guid,
 	'text' => elgg_echo('au_subgroups:subgroups:more'),
 	'is_trusted' => true,
 ));
@@ -27,8 +32,7 @@ else {
 
 $title = elgg_echo('au_subgroups:subgroups');
 
-if ($subgroups) {
-  $body .= "<div class='center mts'>$all_link</div>";
-}
+
+$body .= "<div class='center mts'>$all_link</div>";
 
 echo elgg_view_module('aside', $title, $body);

@@ -118,38 +118,34 @@ function au_subgroups_groups_router($hook, $type, $return, $params) {
   
   // subgroup options
   if ($return['segments'][0] == 'subgroups') {
+	$group = get_entity($return['segments'][2]);
+	if (!elgg_instanceof($group, 'group') || ($group->subgroups_enable == 'no')) {
+	  return $return;
+	}
+	
+	elgg_set_context('groups');
+    elgg_set_page_owner_guid($group->guid);
     
     switch ($return['segments'][1]) {
       case 'add':
-        elgg_set_context('groups');
         set_input('au_subgroup', true);
-        set_input('au_subgroup_parent_guid', $return['segments'][2]);
-        elgg_set_page_owner_guid($return['segments'][2]);
+        set_input('au_subgroup_parent_guid', $group->guid);
         if (include(elgg_get_plugins_path() . 'au_subgroups/pages/add.php')) {
           return true;
         }
         break;
         
       case 'delete':
-        elgg_set_context('groups');
-        elgg_set_page_owner_guid($return['segments'][2]);
         if (include(elgg_get_plugins_path() . 'au_subgroups/pages/delete.php')) {
           return true;
         }
         break;
-    }
-    
-    
-    // assume that we're listing
-    $group = get_entity($return['segments'][1]);
-    
-    if (elgg_instanceof($group, 'group')) {
-      elgg_set_context('groups');
-      elgg_set_page_owner_guid($group->guid);
-      
-      if (include(elgg_get_plugins_path() . 'au_subgroups/pages/list.php')) {
-        return true;
-      }
+		
+	  case 'list':
+		if (include(elgg_get_plugins_path() . 'au_subgroups/pages/list.php')) {
+		  return true;
+		}
+		break;
     }
   }
   

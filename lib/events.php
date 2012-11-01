@@ -9,7 +9,7 @@ function au_subgroups_add_parent($event, $type, $object) {
   
   $parent = get_entity($parent_guid);
   // subgroups aren't enabled, how are we creating a new subgroup?
-  if (elgg_instanceof($parent, 'group') && $parent->enable_subgroups == 'no') {
+  if (elgg_instanceof($parent, 'group') && $parent->subgroups_enable == 'no') {
     register_error(elgg_echo('au_subtypes:error:create:disabled'));
     return FALSE;
   }
