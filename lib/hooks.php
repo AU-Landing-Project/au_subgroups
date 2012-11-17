@@ -118,6 +118,7 @@ function au_subgroups_groups_router($hook, $type, $return, $params) {
   
   // subgroup options
   if ($return['segments'][0] == 'subgroups') {
+	elgg_load_library('elgg:groups');
 	$group = get_entity($return['segments'][2]);
 	if (!elgg_instanceof($group, 'group') || ($group->subgroups_enable == 'no')) {
 	  return $return;
@@ -180,3 +181,34 @@ function au_subgroups_river_permissions($hook, $type, $return, $params) {
 }
 
 
+
+function au_subgroups_titlemenu($h, $t, $r, $p) {
+  if (in_array(elgg_get_context(), array('group_profile', 'groups'))) {
+	$group = elgg_get_page_owner_entity();
+	
+	// make sure we're dealing with a group
+	if (!elgg_instanceof($group, 'group')) {
+	  return $r;
+	}
+	
+	// make sure the group is a subgroup
+	$parent = au_subgroups_get_parent_group($group);
+	if (!$parent) {
+	  return $r;
+	}
+	
+	// see if we're a member of the parent group
+	if ($parent->isMember()) {
+	  return $r;
+	}
+	
+	// we're not a member, so we need to remove any 'join'/'request membership' links
+	foreach ($r as $key => $item) {
+	  if (in_array($item->getName(), array('groups:join', 'groups:joinrequest'))) {
+		unset($r[$key]);
+	  }
+	}
+	
+	return $r;
+  }
+}

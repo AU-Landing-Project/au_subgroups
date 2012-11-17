@@ -50,6 +50,9 @@ function au_subgroups_init() {
   // prevent users from being invited into a subgroup they can't join
   elgg_register_plugin_hook_handler('action', 'groups/invite', 'au_subgroups_group_invite');
   
+  // remove 'join' and 'request membership' title links on subgroups for people not members of the parent
+  elgg_register_plugin_hook_handler('register', 'menu:title', 'au_subgroups_titlemenu');
+  
   // register our widget
   elgg_register_widget_type('au_subgroups', elgg_echo('au_subgroups'), elgg_echo('au_subgroups:widget:description'), 'groups');
   
@@ -68,7 +71,7 @@ function au_subgroups_bugfix_20121024a() {
   
   // using ElggBatch because there may be many, many groups in the installation
   // try to avoid oom errors
-  $batch = new ElggBatch('elgg_get_entities', $options, 'au_subgroups_fix_acls', 50);
+  $batch = new ElggBatch('elgg_get_entities', $options, 'au_subgroups_fix_acls_20121024a', 50);
 }
 
 function au_subgroups_fix_acls_20121024a($result, $getter, $options) {
