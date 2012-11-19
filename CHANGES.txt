@@ -2,7 +2,7 @@
 
 x.x
 
-1.5 ():
+1.5 (11/19/2012):
  - added create subgroup link to parent group title menu again (make up your minds!)
  - removes 'join' and 'request membership' title buttons for subgroups when the viewer isn't a member of the parent
  - requires 1.8.9 due to changes in groups library
