@@ -157,7 +157,9 @@ function au_subgroups_leave_group($event, $type, $params) {
 function au_subgroups_pagesetup() {
   if (in_array(elgg_get_context(), array('au_subgroups', 'group_profile'))) {
     $group = elgg_get_page_owner_entity();
-    if (elgg_instanceof($group, 'group') && $group->canEdit()) {
+    if (elgg_instanceof($group, 'group')
+			&& $group->canEdit()
+			&& $group->subgroups_enable != 'no') {
       // register our title menu
       elgg_register_menu_item('title', array(
         'name' => 'add_subgroup',
