@@ -7,7 +7,10 @@ function au_subgroups_breadcrumb_override($params) {
   switch ($params['segments'][0]) {
     case 'profile':
       $group = get_entity($params['segments'][1]);
-      
+      if (!$group) {
+		return;
+	  }
+	  
       $breadcrumbs[] = array('title' => elgg_echo('groups'), 'link' => elgg_get_site_url() . 'groups/all');
       $parentcrumbs = au_subgroups_parent_breadcrumbs($group, false);
       
@@ -25,6 +28,9 @@ function au_subgroups_breadcrumb_override($params) {
       
     case 'edit':
       $group = get_entity($params['segments'][1]);
+	  if (!$group) {
+		return;
+	  }
       
       $breadcrumbs[] = array('title' => elgg_echo('groups'), 'link' => elgg_get_site_url() . 'groups/all');
       $parentcrumbs = au_subgroups_parent_breadcrumbs($group, false);
