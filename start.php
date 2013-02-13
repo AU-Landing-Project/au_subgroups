@@ -19,10 +19,16 @@ function au_subgroups_init() {
   elgg_extend_view('group/elements/summary', 'au_subgroups/group/elements/summary');
   elgg_extend_view('groups/tool_latest', 'au_subgroups/group_module');
   elgg_extend_view('groups/sidebar/members', 'au_subgroups/sidebar/subgroups');
+  elgg_extend_view('groups/edit', 'au_subgroups/group/transfer');
+  
+  // register the edit page's JavaScript
+  $js = elgg_get_simplecache_url('js', 'au_subgroups/edit_js');
+  elgg_register_js('au_subgroups_edit.js', $js);
+  elgg_register_simplecache_view('js/au_subgroups/edit_js');
   
   // after group creation or editing we need to check the permissions
   elgg_register_event_handler('update', 'group', 'au_subgroups_group_visibility');
-  elgg_register_event_handler('create', 'member', 'au_subgroups_join_group');
+  elgg_register_event_handler('create', 'member', 'au_subgroups_join_group', 0);
   elgg_register_event_handler('leave', 'group', 'au_subgroups_leave_group');
   // break up the create/update events to be more manageable
   elgg_register_event_handler('create', 'group', 'au_subgroups_add_parent', 1000);
@@ -55,6 +61,12 @@ function au_subgroups_init() {
   
   // register our widget
   elgg_register_widget_type('au_subgroups', elgg_echo('au_subgroups'), elgg_echo('au_subgroups:widget:description'), 'groups');
+  
+  elgg_register_ajax_view('au_subgroups/search_results');
+  
+  
+  // actions
+  elgg_register_action('au_subgroups/move', dirname(__FILE__) . '/actions/move.php');
   
   // fix some problems
   if (elgg_is_admin_logged_in()) {

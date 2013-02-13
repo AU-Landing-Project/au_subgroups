@@ -127,9 +127,48 @@ function au_subgroups_join_group($event, $type, $object) {
     $user = get_entity($object->guid_one);
     $group = get_entity($object->guid_two);
     $parent = au_subgroups_get_parent_group($group);
+	
+	// use temp global config to decide if we should prevent joining
+	// prevent joining if not a member of the parent group
+	// except during a subgroup move invitation
+	$au_subgroups_ignore_join = elgg_get_config('au_subgroups_ignore_join');
     
-    if ($parent) {
-      if (!$parent->isMember($user)) {
+    if ($parent && !$au_subgroups_ignore_join) {
+	  // cover the case of moved subgroups
+	  // user will have been invited, and have a plugin setting saying which other groups to join
+	  $invited = check_entity_relationship($group->guid, 'invited', $user->guid);
+	  $children_to_join = elgg_get_plugin_user_setting('invitation_' . $group->guid, $user->guid, 'au_subgroups');
+	  
+	  if (!empty($children_to_join)) {
+		$children_to_join = unserialize($children_to_join);
+	  }
+	  
+	  if ($invited) {
+		elgg_set_config('au_subgroups_ignore_join', true);
+		// we have been invited in through the back door by a subgroup move
+		// join this user to all parent groups fo this group
+		if (au_subgroups_join_parents_recursive($group, $user)) {
+		  // we're in, now lets rejoin the children
+		  if (is_array($children_to_join)) {
+			$children_guids = au_subgroups_get_all_children_guids($group);
+			foreach ($children_to_join as $child) {
+			  if (in_array($child, $children_guids)) {
+				$child_group = get_entity($child);
+				$child_group->join($user);
+			  }
+			}
+		  }
+		  
+		  // delete plugin setting
+		  elgg_set_plugin_user_setting('invitation_' . $group->guid, '', $user->guid, 'au_subgroups');
+		}
+		else {
+		  // something went wrong with joining the groups
+		  // lets stop everything now
+		  return false;
+		}
+	  }
+	  elseif (!$parent->isMember($user)) {
         register_error(elgg_echo('au_subgroups:error:notparentmember'));
         return false;
       }
