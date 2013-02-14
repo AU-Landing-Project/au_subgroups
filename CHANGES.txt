@@ -2,13 +2,12 @@
 
 x.x
 
-1.6 ():
+1.6 (02/14/2013):
  - fixes potential php fatal error (wsod) under certain conditions
  - adds ability to move a group and all subgroups to be a subgroup of another
  - adds group setting to allow any member to create subgroups (enabled by default)
  - fixes bug with subgroup edit permissions for higher level admins that aren't members
  - enforce visibility restrictions when moving subgroups to new parents
-@TODO - fix defaulted 'closed membership' option
 
 Notes on subgroup move:
 - must have edit permissions for subgroup and parent group up to the top level
