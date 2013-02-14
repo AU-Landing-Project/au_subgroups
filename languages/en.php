@@ -4,7 +4,6 @@ $english = array(
     'au_subgroups' => "Sub-Groups",
     'au_subgroups:subgroup' => "Sub-Group",
     'au_subgroups:subgroups' => "Sub-Groups",
-    'au_subgroups:group:enable' => "Enable Sub-Groups for this group?",
     'au_subgroups:parent' => "Parent Group",
     'au_subgroups:add:subgroup' => 'Create a Sub-Group',
     'au_subgroups:nogroups' => 'No Sub-Groups have been created',
@@ -23,6 +22,10 @@ $english = array(
     'au_subgroups:error:invite' => "Action has been cancelled - the following users are not members of the parent group and cannot be invited/added.",
     'au_subgroups:option:parent:members' => "Members of the parent group",
     'au_subgroups:subgroups:more' => "View all Sub-Groups",
+	
+	// group options
+	'au_subgroups:group:enable' => "Subgroups: Enable Sub-Groups for this group?",
+	'au_subgroups:group:memberspermissions' => "Subgroups: Enable any member to create subgroups? (if no, only group admins will be able to create subgroups)",
     
     /*
      * Widget

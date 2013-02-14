@@ -8,10 +8,20 @@ function au_subgroups_add_parent($event, $type, $object) {
   }
   
   $parent = get_entity($parent_guid);
-  // subgroups aren't enabled, how are we creating a new subgroup?
-  if (elgg_instanceof($parent, 'group') && $parent->subgroups_enable == 'no') {
-    register_error(elgg_echo('au_subtypes:error:create:disabled'));
-    return FALSE;
+  // a few things that can stop subgroup creation
+  // - no subgroups allowed
+  // - not an admin/group-admin and members disallowed
+  
+  if (elgg_instanceof($parent, 'group')) {
+	if ($parent->subgroups_enable == 'no') {
+	  return FALSE;
+	}
+	if ($parent->subgroups_members_create_enable == 'no') {
+	  // only group admins can create subgroups
+	  if (!$parent->canEdit()) {
+		return FALSE;
+	  }
+	}
   }
 }
 
@@ -196,16 +206,18 @@ function au_subgroups_leave_group($event, $type, $params) {
 function au_subgroups_pagesetup() {
   if (in_array(elgg_get_context(), array('au_subgroups', 'group_profile'))) {
     $group = elgg_get_page_owner_entity();
-    if (elgg_instanceof($group, 'group')
-			&& $group->canEdit()
-			&& $group->subgroups_enable != 'no') {
-      // register our title menu
-      elgg_register_menu_item('title', array(
-        'name' => 'add_subgroup',
-        'href' => "groups/subgroups/add/{$group->guid}",
-        'text' => elgg_echo('au_subgroups:add:subgroup'),
-        'class' => 'elgg-button elgg-button-action'
-      ));
+	$any_member = ($group->subgroups_members_create_enable != 'no');
+    if (elgg_instanceof($group, 'group') && $group->subgroups_enable != 'no') {
+	  
+	  if (($any_member && $group->isMember()) || $group->canEdit()) {
+		// register our title menu
+		elgg_register_menu_item('title', array(
+		  'name' => 'add_subgroup',
+		  'href' => "groups/subgroups/add/{$group->guid}",
+		  'text' => elgg_echo('au_subgroups:add:subgroup'),
+		  'class' => 'elgg-button elgg-button-action'
+		));
+	  }
     }
   }
 }

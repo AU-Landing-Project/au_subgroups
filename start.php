@@ -40,6 +40,7 @@ function au_subgroups_init() {
   elgg_register_library('elgg:groups', elgg_get_plugins_path() . 'au_subgroups/lib/groups.php');
   
   add_group_tool_option('subgroups', elgg_echo('au_subgroups:group:enable'));
+  add_group_tool_option('subgroups_members_create', elgg_echo('au_subgroups:group:memberspermissions'));
   
   // route some urls that go through 'groups' handler
   elgg_register_plugin_hook_handler('route', 'groups', 'au_subgroups_groups_router', 499);

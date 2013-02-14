@@ -6,6 +6,8 @@ $parent_guid = get_input('parent_guid');
 $subgroup = get_entity($subgroup_guid);
 $parent = get_entity($parent_guid);
 
+$oldparent = au_subgroups_get_parent_group($subgroup);
+
 $child_groups = au_subgroups_get_all_children_guids($subgroup);
 
 //sanity check
@@ -24,6 +26,36 @@ if (!au_subgroups_can_move_subgroup($subgroup, $parent)) {
 au_subgroups_remove_parent_group($subgroup->guid);
 
 au_subgroups_set_parent_group($subgroup->guid, $parent->guid);
+
+// determine the access_id of the new group, must be equal or more restrictive than the parent
+switch ($parent->access_id) {
+  case ACCESS_PUBLIC:
+	  // only need to check that subgroup wasn't to old parent only
+	  if ($subgroup->access_id == $oldparent->group_acl) {
+		$subgroup->access_id = $parent->group_acl;
+	  }
+	break;
+  case ACCESS_LOGGED_IN:
+	  // subgroup cannot be public
+	  if ($subgroup->access_id == ACCESS_PUBLIC) {
+		$subgroup->access_id = ACCESS_LOGGED_IN;
+	  }
+	  elseif ($subgroup->access_id == $oldparent->group_acl) {
+		$subgroup->access_id = $parent->group_acl;
+	  }
+	break;
+  case $parent->group_acl:
+  default:
+	  // if none of the above, then parent is visible to it's parent
+	  // lets keep that model
+	  //hidden group, make sure subgroup can only be seen by parent, or is hidden itself
+	  if ($subgroup->access_id != $subgroup->group_acl) {
+		$subgroup->access_id = $parent->group_acl;
+	  }
+	break;
+}
+
+$subgroup->save();
 
 //now we need to make sure that all members of the new subgroup are
 // members of the parent group
