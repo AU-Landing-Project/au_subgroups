@@ -2,6 +2,9 @@
 
 x.x
 
+1.7 (03/14/2013):
+ - adds 'my_status' to group profiles
+
 1.6 (02/14/2013):
  - fixes potential php fatal error (wsod) under certain conditions
  - adds ability to move a group and all subgroups to be a subgroup of another
