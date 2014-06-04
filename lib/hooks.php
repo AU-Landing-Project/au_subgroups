@@ -120,7 +120,7 @@ function au_subgroups_groups_router($hook, $type, $return, $params) {
   if ($return['segments'][0] == 'subgroups') {
 	elgg_load_library('elgg:groups');
 	$group = get_entity($return['segments'][2]);
-	if (!elgg_instanceof($group, 'group') || ($group->subgroups_enable == 'no')) {
+	if (!elgg_instanceof($group, 'group') || (($group->subgroups_enable == 'no') && ($return['segments'][1] != "delete"))) {
 	  return $return;
 	}
 	
