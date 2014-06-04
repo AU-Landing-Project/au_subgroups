@@ -202,10 +202,21 @@ function au_subgroups_titlemenu($h, $t, $r, $p) {
 	  return $r;
 	}
 	
+	$actions = array();
+	$url = elgg_get_site_url() . "action/groups/join?group_guid={$parent->getGUID()}";
+		$url = elgg_add_action_tokens_to_url($url);
+		if ($parent->isPublicMembership() || $parent->canEdit()) {
+			$actions[$url] = 'groups:join';
+		} else {
+			// request membership
+			$actions[$url] = 'groups:joinrequest';
+		}
+	
 	// we're not a member, so we need to remove any 'join'/'request membership' links
 	foreach ($r as $key => $item) {
 	  if (in_array($item->getName(), array('groups:join', 'groups:joinrequest'))) {
-		unset($r[$key]);
+		$r[$key]->setHref($url);
+		$r[$key]->setText(elgg_echo('subgroups:parent:need_join'));
 	  }
 	}
 	
