@@ -61,7 +61,7 @@ function au_subgroups_init() {
   elgg_register_plugin_hook_handler('register', 'menu:title', 'au_subgroups_titlemenu');
   
   // register our widget
-  elgg_register_widget_type('au_subgroups', elgg_echo('au_subgroups'), elgg_echo('au_subgroups:widget:description'), 'groups');
+  elgg_register_widget_type('au_subgroups', elgg_echo('au_subgroups'), elgg_echo('au_subgroups:widget:description'), array('groups')),
   
   elgg_register_ajax_view('au_subgroups/search_results');
   
