@@ -1,5 +1,7 @@
 <?php
 
+namespace AU\SubGroups;
+
 if ($vars['subgroup_guid']) {
   $subgroup_guid = $vars['subgroup_guid'];
   $subgroup = get_entity($subgroup_guid);
@@ -8,7 +10,7 @@ else {
   $subgroup = elgg_get_page_owner_entity();
 }
 
-elgg_load_js('au_subgroups_edit.js');
+elgg_require_js('au_subgroups/edit');
 
 $dbprefix = elgg_get_config('dbprefix');
 
@@ -31,8 +33,7 @@ else {
 $groups = elgg_get_entities($options);
 
 
-$context = elgg_get_context();
-elgg_set_context('widgets'); // use widgets context so no entity menu is used
+elgg_push_context('widgets'); // use widgets context so no entity menu is used
 if ($groups) {
   echo '<div class="au-subgroups-result-col">';
   
@@ -43,7 +44,7 @@ if ($groups) {
 	  echo '<div class="au-subgroups-result-col">';
 	}
 	
-	if (au_subgroups_can_move_subgroup($subgroup, $groups[$i])) {
+	if (can_move_subgroup($subgroup, $groups[$i])) {
 	  $class = 'au-subgroups-parentable';
 	}
 	else {
@@ -63,4 +64,4 @@ if ($groups) {
 else {
   echo elgg_echo('au_subgroups:search:noresults');
 }
-elgg_set_context($context);
+elgg_pop_context();

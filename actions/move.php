@@ -1,14 +1,16 @@
 <?php
 
+namespace AU\SubGroups;
+
 $subgroup_guid = get_input('subgroup_guid');
 $parent_guid = get_input('parent_guid');
 
 $subgroup = get_entity($subgroup_guid);
 $parent = get_entity($parent_guid);
 
-$oldparent = au_subgroups_get_parent_group($subgroup);
+$oldparent = get_parent_group($subgroup);
 
-$child_groups = au_subgroups_get_all_children_guids($subgroup);
+$child_groups = get_all_children_guids($subgroup);
 
 //sanity check
 if (!elgg_instanceof($subgroup, 'group') || !elgg_instanceof($parent, 'group')) {
@@ -17,15 +19,15 @@ if (!elgg_instanceof($subgroup, 'group') || !elgg_instanceof($parent, 'group')) 
 }
 
 // we need to have edit permissions all the way up
-if (!au_subgroups_can_move_subgroup($subgroup, $parent)) {
+if (!can_move_subgroup($subgroup, $parent)) {
   register_error(elgg_echo('au_subgroups:error:permissions'));
   forward(REFERER);
 }
 
 // remove any existing parent relationships
-au_subgroups_remove_parent_group($subgroup->guid);
+remove_parent_group($subgroup->guid);
 
-au_subgroups_set_parent_group($subgroup->guid, $parent->guid);
+set_parent_group($subgroup->guid, $parent->guid);
 
 // determine the access_id of the new group, must be equal or more restrictive than the parent
 switch ($parent->access_id) {
@@ -61,6 +63,7 @@ $subgroup->save();
 // members of the parent group
 
 // get all members of the subgroup - any members of subgroups have to be in this anyway
+//@todo - this better
 global $AU_SUBGROUPS_ALL_MEMBERS;
 
 $AU_SUBGROUPS_ALL_MEMBERS = array();
@@ -68,12 +71,12 @@ $AU_SUBGROUPS_ALL_MEMBERS = array();
 $options = array(
 	'relationship' => 'member',
 	'relationship_guid' => $subgroup->guid,
-	'inverse_relationship' => TRUE,
+	'inverse_relationship' => true,
 	'type' => 'user',
 	'limit' => false,
 );
 
-$batch = new ElggBatch('elgg_get_entities_from_relationship', $options, 'au_subgroups_get_all_members', 25);
+$batch = new \ElggBatch('elgg_get_entities_from_relationship', $options, 'au_subgroups_get_all_members', 25);
 
 $AU_SUBGROUPS_ALL_MEMBERS = array_unique($AU_SUBGROUPS_ALL_MEMBERS);
 
@@ -98,7 +101,7 @@ foreach ($AU_SUBGROUPS_ALL_MEMBERS as $member_guid) {
 	leave_group($subgroup_guid, $member_guid);
 	
 	// now we need to set a plugin user setting for this user that we can monitor
-	elgg_set_plugin_user_setting('invitation_' . $subgroup_guid, serialize($groups_left), $member_guid, 'au_subgroups');
+	elgg_set_plugin_user_setting('invitation_' . $subgroup_guid, serialize($groups_left), $member_guid, PLUGIN_ID);
 	
 	// invite the user
 	add_entity_relationship($subgroup_guid, 'invited', $member_guid);

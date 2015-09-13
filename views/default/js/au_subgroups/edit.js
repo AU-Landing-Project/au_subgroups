@@ -11,7 +11,7 @@ elgg.au_subgroups.init = function() {
   // init groups selection
   elgg.au_subgroups.select();
 
-}
+};
 
 elgg.au_subgroups.search = function() {
   $('.au-subgroups-search').live('keyup', function() {
@@ -56,7 +56,7 @@ elgg.au_subgroups.search = function() {
     });
   
   });
-}
+};
 
 
 elgg.au_subgroups.select = function() {
@@ -75,6 +75,6 @@ elgg.au_subgroups.select = function() {
 	  window.location.href = action;
 	}
   });
-}
+};
 
 elgg.register_hook_handler('init', 'system', elgg.au_subgroups.init);
