@@ -179,15 +179,9 @@ function join_group_event($event, $type, $relationship) {
 			} else {
 				// something went wrong with joining the groups
 				// lets stop everything now
-				//@todo - returning false doesn't prevent the relationship until
-				// Elgg 1.12.4
-				$relationship->delete();
 				return false;
 			}
 		} elseif (!$parent->isMember($user)) {
-			//@todo - returning false doesn't prevent the relationship until
-			// Elgg 1.12.4
-			$relationship->delete();
 			register_error(elgg_echo('au_subgroups:error:notparentmember'));
 			return false;
 		}
