@@ -6,7 +6,7 @@ function add_parent($event, $type, $object) {
 	// if we have an input, then we're setting the parent
 	$parent_guid = get_input('au_subgroups_parent_guid', false);
 	if ($parent_guid !== false) {
-		au_subgroups_set_parent_group($object->guid, $parent_guid);
+		set_parent_group($object->guid, $parent_guid);
 	}
 
 	$parent = get_entity($parent_guid);
@@ -29,10 +29,10 @@ function add_parent($event, $type, $object) {
 
 function clone_layout_on_create($event, $type, $object) {
 	if (elgg_is_active_plugin('group_custom_layout')) {
-		$parent = au_subgroups_get_parent_group($object);
+		$parent = get_parent_group($object);
 
 		if ($parent) {
-			au_subgroups_clone_layout($object, $parent);
+			clone_layout($object, $parent);
 		}
 	}
 }
@@ -42,7 +42,7 @@ function clone_layout_on_create($event, $type, $object) {
  * access only by parent group acl
  */
 function group_visibility($event, $type, $object) {
-	$parent = au_subgroups_get_parent_group($object);
+	$parent = get_parent_group($object);
 
 	// make sure the visibility is what was set on the form
 	$vis = get_input('vis', false);
@@ -92,7 +92,7 @@ function group_visibility($event, $type, $object) {
 		// we need to check the subgroups to make sure they're not more visible than this group
 		set_time_limit(0); // this is recursive and could take a while
 
-		$children = au_subgroups_get_subgroups($object, 0);
+		$children = get_subgroups($object, 0);
 
 		if ($children) {
 			foreach ($children as $child) {
@@ -133,54 +133,63 @@ function group_visibility($event, $type, $object) {
  * @param ElggRelationship $object
  * @return boolean
  */
-function join_group($event, $type, $object) {
-	if ($object instanceof \ElggRelationship) {
-		$user = get_entity($object->guid_one);
-		$group = get_entity($object->guid_two);
-		$parent = au_subgroups_get_parent_group($group);
+function join_group_event($event, $type, $relationship) {
 
-		// use temp global config to decide if we should prevent joining
-		// prevent joining if not a member of the parent group
-		// except during a subgroup move invitation
-		$au_subgroups_ignore_join = elgg_get_config('au_subgroups_ignore_join');
+	$user = get_user($relationship->guid_one);
+	$group = get_entity($relationship->guid_two);
 
-		if ($parent && !$au_subgroups_ignore_join) {
-			// cover the case of moved subgroups
-			// user will have been invited, and have a plugin setting saying which other groups to join
-			$invited = check_entity_relationship($group->guid, 'invited', $user->guid);
-			$children_to_join = elgg_get_plugin_user_setting('invitation_' . $group->guid, $user->guid, 'au_subgroups');
+	if (!$user || !($group instanceof \ElggGroup) || $relationship->relationship != 'member') {
+		return true;
+	}
+	$parent = get_parent_group($group);
 
-			if (!empty($children_to_join)) {
-				$children_to_join = unserialize($children_to_join);
-			}
+	// use temp global config to decide if we should prevent joining
+	// prevent joining if not a member of the parent group
+	// except during a subgroup move invitation
+	$au_subgroups_ignore_join = elgg_get_config('au_subgroups_ignore_join');
 
-			if ($invited) {
-				elgg_set_config('au_subgroups_ignore_join', true);
-				// we have been invited in through the back door by a subgroup move
-				// join this user to all parent groups fo this group
-				if (au_subgroups_join_parents_recursive($group, $user)) {
-					// we're in, now lets rejoin the children
-					if (is_array($children_to_join)) {
-						$children_guids = au_subgroups_get_all_children_guids($group);
-						foreach ($children_to_join as $child) {
-							if (in_array($child, $children_guids)) {
-								$child_group = get_entity($child);
-								$child_group->join($user);
-							}
+	if ($parent && !$au_subgroups_ignore_join) {
+		// cover the case of moved subgroups
+		// user will have been invited, and have a plugin setting saying which other groups to join
+		$invited = check_entity_relationship($group->guid, 'invited', $user->guid);
+		$children_to_join = elgg_get_plugin_user_setting('invitation_' . $group->guid, $user->guid, PLUGIN_ID);
+
+		if (!empty($children_to_join)) {
+			$children_to_join = unserialize($children_to_join);
+		}
+
+		if ($invited) {
+			elgg_set_config('au_subgroups_ignore_join', true);
+			// we have been invited in through the back door by a subgroup move
+			// join this user to all parent groups of this group
+			if (join_parents_recursive($group, $user)) {
+				// we're in, now lets rejoin the children
+				if (is_array($children_to_join)) {
+					$children_guids = get_all_children_guids($group);
+					foreach ($children_to_join as $child) {
+						if (in_array($child, $children_guids)) {
+							$child_group = get_entity($child);
+							$child_group->join($user);
 						}
 					}
-
-					// delete plugin setting
-					elgg_set_plugin_user_setting('invitation_' . $group->guid, '', $user->guid, 'au_subgroups');
-				} else {
-					// something went wrong with joining the groups
-					// lets stop everything now
-					return false;
 				}
-			} elseif (!$parent->isMember($user)) {
-				register_error(elgg_echo('au_subgroups:error:notparentmember'));
+
+				// delete plugin setting
+				elgg_set_plugin_user_setting('invitation_' . $group->guid, '', $user->guid, PLUGIN_ID);
+			} else {
+				// something went wrong with joining the groups
+				// lets stop everything now
+				//@todo - returning false doesn't prevent the relationship until
+				// Elgg 1.12.4
+				$relationship->delete();
 				return false;
 			}
+		} elseif (!$parent->isMember($user)) {
+			//@todo - returning false doesn't prevent the relationship until
+			// Elgg 1.12.4
+			$relationship->delete();
+			register_error(elgg_echo('au_subgroups:error:notparentmember'));
+			return false;
 		}
 	}
 }
@@ -192,8 +201,8 @@ function join_group($event, $type, $object) {
  * @param type $type
  * @param type $object
  */
-function leave_group($event, $type, $params) {
-	$guids = au_subgroups_get_all_children_guids($params['group']);
+function leave_group_event($event, $type, $params) {
+	$guids = get_all_children_guids($params['group']);
 
 	foreach ($guids as $guid) {
 		leave_group($guid, $params['user']->guid);
@@ -212,19 +221,86 @@ function pagesetup() {
 					'name' => 'add_subgroup',
 					'href' => "groups/subgroups/add/{$group->guid}",
 					'text' => elgg_echo('au_subgroups:add:subgroup'),
-					'class' => 'elgg-button elgg-button-action'
+					'link_class' => 'elgg-button elgg-button-action'
 				));
 			}
 		}
 	}
 }
 
+function delete_group_event($event, $type, $group) {
+	$content_policy = get_input('au_subgroups_content_policy', false);
+
+	if (!$content_policy) {
+		return true;
+	}
+
+	$guid = get_input('guid');
+	if (!$guid) {
+		$guid = get_input('group_guid');
+	}
+
+	// protects against recursion on the group/delete action
+	if (!$guid || $group->guid != $guid) {
+		return true;
+	}
+
+	$parent = get_parent_group($group);
+
+	// this is the top level to delete, so if transferring content to parent, it's the parent of this
+	// apply content policy recursively, then delete all subgroups recursively
+	// this could take a while...
+	set_time_limit(0);
+	$guids = get_all_children_guids($group);
+	$guids[] = $group->guid;
+	if (is_array($guids) && count($guids)) {
+		if ($content_policy != 'delete' && is_array($guids) && count($guids)) {
+			$options = array(
+				'container_guids' => $guids,
+				'au_subgroups_content_policy' => $content_policy,
+				'au_subgroups_parent_guid' => $parent->guid,
+				'limit' => 0
+			);
+
+			$batch = new \ElggBatch('elgg_get_entities', $options, null, 25);
+
+			$ia = elgg_set_ignore_access(true);
+			foreach ($batch as $content) {
+				if ($content_policy == 'owner') {
+					$container_guid = $content->owner_guid;
+				} else {
+					$container_guid = $parent->guid;
+				}
+
+				$content->container_guid = $container_guid;
+				$content->save();
+			}
+			elgg_set_ignore_access($ia);
+		}
+
+		// now delete the groups themselves
+		$options = array(
+			'guids' => $guids,
+			'types' => array('group'),
+			'limit' => 0
+		);
+
+		$batch = new \ElggBatch('elgg_get_entities', $options, null, 25, false);
+
+		foreach ($batch as $e) {
+			if ($e->guid == $group->guid) {
+				continue; // the action itself will take care of this
+			}
+			$e->delete();
+		}
+	}
+}
 
 function upgrades() {
 	if (!elgg_is_admin_logged_in()) {
 		return;
 	}
-	
+
 	require_once __DIR__ . '/upgrades.php';
 	run_function_once(__NAMESPACE__ . '\\upgrade20150912');
 }

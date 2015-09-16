@@ -25,9 +25,7 @@ if (empty($vars['q'])) {
 }
 else {
   $query = sanitize_string($vars['q']);
-  $options['selects'] = array("MATCH(g.name, g.description) AGAINST('$query') as relevance");
-  $options['wheres'][] = "MATCH(g.name, g.description) AGAINST('$query')";
-  $options['order_by'] = 'relevance DESC';
+  $options['wheres'][] = "g.name LIKE '{$query}%'";
 }
 
 $groups = elgg_get_entities($options);

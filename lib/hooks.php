@@ -30,33 +30,6 @@ function delete_group($hook, $type, $return, $params) {
 				forward(elgg_get_site_url() . "groups/subgroups/delete/{$group->guid}");
 			}
 
-			// this is the top level to delete, so if transferring content to parent, it's the parent of this
-			// apply content policy recursively, then delete all subgroups recursively
-			// this could take a while...
-			set_time_limit(0);
-			$guids = get_all_children_guids($group);
-
-			if (is_array($guids) && count($guids)) {
-				if ($content_policy != 'delete' && is_array($guids) && count($guids)) {
-					$options = array(
-						'container_guids' => $guids,
-						'au_subgroups_content_policy' => $content_policy,
-						'au_subgroups_parent_guid' => $parent->guid,
-						'limit' => 0
-					);
-					//@todo fix this
-					$batch = new \ElggBatch('elgg_get_entities', $options, 'au_subgroups_move_content', 25);
-				}
-
-				// now delete the groups themselves
-				$options = array(
-					'guids' => $guids,
-					'types' => array('group'),
-					'limit' => 0
-				);
-				//@todo - fix this
-				$batch = new \ElggBatch('elgg_get_entities', $options, 'au_subgroups_delete_entities', 25, false);
-			}
 		}
 	}
 }
@@ -131,23 +104,42 @@ function groups_router($hook, $type, $return, $params) {
 
 		switch ($return['segments'][1]) {
 			case 'add':
-				set_input('au_subgroup', true);
-				set_input('au_subgroup_parent_guid', $group->guid);
-				if (include(elgg_get_plugins_path() . 'au_subgroups/pages/add.php')) {
-					return true;
-				}
+				$return = array(
+					'identifier' => 'au_subgroups',
+					'handler' => 'au_subgroups',
+					'segments' => array(
+						'add',
+						$group->guid
+					)
+				);
+				
+				return $return;
 				break;
 
 			case 'delete':
-				if (include(elgg_get_plugins_path() . 'au_subgroups/pages/delete.php')) {
-					return true;
-				}
+				$return = array(
+					'identifier' => 'au_subgroups',
+					'handler' => 'au_subgroups',
+					'segments' => array(
+						'delete',
+						$group->guid
+					)
+				);
+				
+				return $return;
 				break;
 
 			case 'list':
-				if (include(elgg_get_plugins_path() . 'au_subgroups/pages/list.php')) {
-					return true;
-				}
+				$return = array(
+					'identifier' => 'au_subgroups',
+					'handler' => 'au_subgroups',
+					'segments' => array(
+						'list',
+						$group->guid
+					)
+				);
+				
+				return $return;
 				break;
 		}
 	}
@@ -162,8 +154,16 @@ function groups_router($hook, $type, $return, $params) {
 		}
 
 		if (in_array($filter, array("open", "closed", "alpha"))) {
-			handle_openclosed_tabs();
-			return true;
+			$return = array(
+					'identifier' => 'au_subgroups',
+					'handler' => 'au_subgroups',
+					'segments' => array(
+						'openclosed',
+						$filter
+					)
+				);
+				
+			return $return;
 		}
 	}
 }
@@ -191,7 +191,7 @@ function titlemenu($h, $t, $r, $p) {
 		}
 
 		// make sure the group is a subgroup
-		$parent = au_subgroups_get_parent_group($group);
+		$parent = get_parent_group($group);
 		if (!$parent) {
 			return $r;
 		}

@@ -9,7 +9,8 @@ echo elgg_view('output/longtext', array(
 
 echo elgg_view('input/text', array(
 	'name' => 'au-subgroups-search',
-	'value' => elgg_echo('au_subgroups:search:text'),
+	'value' => '',
+	'placeholder' => elgg_echo('au_subgroups:search:text'),
 	'class' => 'au-subgroups-search'
 ));
 

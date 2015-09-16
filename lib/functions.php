@@ -89,9 +89,6 @@ function clone_layout($group, $parent) {
 	$group->addRelationship($layout->getGUID(), GROUP_CUSTOM_LAYOUT_RELATION);
 }
 
-function delete_entities($result, $getter, $options) {
-	$result->delete();
-}
 
 /**
  * recursively travels down all routes to gather all guids of
@@ -120,11 +117,6 @@ function get_all_children_guids($group, $guids = array()) {
 	return $guids;
 }
 
-function get_all_members($result, $getter, $options) {
-	global $AU_SUBGROUPS_ALL_MEMBERS;
-
-	$AU_SUBGROUPS_ALL_MEMBERS[] = $result->guid;
-}
 
 /**
  * Determines if a group is a subgroup of another group
@@ -151,7 +143,7 @@ function get_parent_group($group) {
 	return false;
 }
 
-function get_subgroups($group, $limit = 10, $sortbytitle = false) {
+function get_subgroups($group, $limit = 10, $sortbytitle = true) {
 	$options = array(
 		'types' => array('group'),
 		'relationship' => AU_SUBGROUPS_RELATIONSHIP,
@@ -166,78 +158,6 @@ function get_subgroups($group, $limit = 10, $sortbytitle = false) {
 	}
 
 	return elgg_get_entities_from_relationship($options);
-}
-
-
-function handle_openclosed_tabs() {
-	$display_subgroups = elgg_get_plugin_setting('display_subgroups', PLUGIN_ID);
-
-	$db_prefix = elgg_get_config('dbprefix');
-	// all groups doesn't get link to self
-	elgg_pop_breadcrumb();
-	elgg_push_breadcrumb(elgg_echo('groups'));
-
-	elgg_register_title_button();
-
-	$selected_tab = get_input('filter');
-
-	// default group options
-	$group_options = array(
-		"type" => "group",
-		"full_view" => false,
-	);
-
-	if ($display_subgroups != 'yes') {
-		$group_options['wheres'] = array("NOT EXISTS ( SELECT 1 FROM {$db_prefix}entity_relationships WHERE guid_one = e.guid AND relationship = '" . AU_SUBGROUPS_RELATIONSHIP . "' )");
-	}
-
-	$group_options['joins'] = array("JOIN {$db_prefix}groups_entity ge ON e.guid = ge.guid");
-	$group_options['order_by'] = 'ge.name ASC';
-
-	switch ($selected_tab) {
-		case "open":
-			$group_options["metadata_name_value_pairs"] = array(
-				"name" => "membership",
-				"value" => ACCESS_PUBLIC
-			);
-
-			break;
-		case "closed":
-			$group_options["metadata_name_value_pairs"] = array(
-				"name" => "membership",
-				"value" => ACCESS_PUBLIC,
-				"operand" => "<>"
-			);
-
-			break;
-
-		case "alpha":
-			$dbprefix = elgg_get_config("dbprefix");
-
-			$group_options["joins"] = array("JOIN " . $dbprefix . "groups_entity ge ON e.guid = ge.guid");
-			$group_options["order_by"] = "ge.name ASC";
-
-			break;
-	}
-
-	if (!($content = elgg_list_entities_from_metadata($group_options))) {
-		$content = elgg_echo("groups:none");
-	}
-
-	$filter = elgg_view('groups/group_sort_menu', array('selected' => $selected_tab));
-
-	$sidebar = elgg_view('groups/sidebar/find');
-	$sidebar .= elgg_view('groups/sidebar/featured');
-
-	$params = array(
-		'content' => $content,
-		'sidebar' => $sidebar,
-		'filter' => $filter,
-	);
-
-	$body = elgg_view_layout('content', $params);
-
-	echo elgg_view_page(elgg_echo('groups:all'), $body);
 }
 
 function list_subgroups($group, $limit = 10) {
@@ -255,19 +175,6 @@ function list_subgroups($group, $limit = 10) {
 	return elgg_list_entities_from_relationship($options);
 }
 
-function move_content($result, $getter, $options) {
-	switch ($options['au_subgroups_content_policy']) {
-		case 'owner':
-			$result->container_guid = $result->owner_guid;
-			$result->save();
-			break;
-
-		case 'parent':
-			$result->container_guid = $options['au_subgroups_parent_guid'];
-			$result->save();
-			break;
-	}
-}
 
 /**
  * Sets breadcrumbs from 'All groups' to current parent

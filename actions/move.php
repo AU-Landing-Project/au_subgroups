@@ -63,10 +63,6 @@ $subgroup->save();
 // members of the parent group
 
 // get all members of the subgroup - any members of subgroups have to be in this anyway
-//@todo - this better
-global $AU_SUBGROUPS_ALL_MEMBERS;
-
-$AU_SUBGROUPS_ALL_MEMBERS = array();
 
 $options = array(
 	'relationship' => 'member',
@@ -76,16 +72,14 @@ $options = array(
 	'limit' => false,
 );
 
-$batch = new \ElggBatch('elgg_get_entities_from_relationship', $options, 'au_subgroups_get_all_members', 25);
-
-$AU_SUBGROUPS_ALL_MEMBERS = array_unique($AU_SUBGROUPS_ALL_MEMBERS);
+$batch = new \ElggBatch('elgg_get_entities_from_relationship', $options);
 
 // array of user guids we need to invite back into the group
 $invite = array();
 
-foreach ($AU_SUBGROUPS_ALL_MEMBERS as $member_guid) {
-  if (!is_group_member($parent_guid, $member_guid)) {
-	$invite[] = $member_guid;
+foreach ($batch as $member) {
+  if (!is_group_member($parent_guid, $member->guid)) {
+	$invite[] = $member->guid;
 	// the user isn't a member of the parent group
 	// so we have to remove them from this subgroup, and all subgroups of this subgroup
 	// and send them an invitation
