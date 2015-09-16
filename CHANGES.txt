@@ -10,6 +10,7 @@ x.x
  - better handling of deleted group content
  - fix javascript error on subgroup move
  - fix search query for innodb
+ - add packagist composer.json
 
 1.7 (03/14/2013):
  - adds 'my_status' to group profiles
