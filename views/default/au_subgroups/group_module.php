@@ -1,4 +1,7 @@
 <?php
+
+namespace AU\SubGroups;
+
 /**
  * Group blog module
  */
@@ -20,7 +23,7 @@ if ($group->canEdit()) {
 }
 
 elgg_push_context('widgets');
-$content = au_subgroups_list_subgroups($group, 10);
+$content = list_subgroups($group, 10);
 elgg_pop_context();
 
 if (!$content) {

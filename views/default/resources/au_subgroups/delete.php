@@ -1,5 +1,7 @@
 <?php
 
+namespace AU\SubGroups;
+
 $page_owner = elgg_get_page_owner_entity();
 if (!$page_owner->canEdit()) {
   register_error(elgg_echo('au_subgroups:noedit'));
@@ -9,7 +11,7 @@ if (!$page_owner->canEdit()) {
 $title = elgg_echo('au_subgroups:subgroups:delete');
 
 // set up breadcrumb navigation
-au_subgroups_parent_breadcrumbs($page_owner);
+parent_breadcrumbs($page_owner);
 elgg_push_breadcrumb($page_owner->name, $page_owner->getURL());
 elgg_push_breadcrumb(elgg_echo('au_subgroups:subgroups:delete'));
 
