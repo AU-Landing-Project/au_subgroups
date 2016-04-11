@@ -7,9 +7,9 @@ const PLUGIN_ID = 'au_subgroups';
 const PLUGIN_VERSION = 20150912;
 
 // include our functions
-require_once 'lib/events.php';
-require_once 'lib/functions.php';
-require_once 'lib/hooks.php';
+require_once __DIR__ . '/lib/events.php';
+require_once __DIR__ . '/lib/functions.php';
+require_once __DIR__ . '/lib/hooks.php';
 
 elgg_register_event_handler('init', 'system', __NAMESPACE__ . '\\init');
 
