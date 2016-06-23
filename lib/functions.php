@@ -136,7 +136,7 @@ function get_parent_group($group) {
 		'relationship_guid' => $group->guid,
 	));
 
-	if (is_array($parent)) {
+	if (is_array($parent) && isset($parent[0])) {
 		return $parent[0];
 	}
 
