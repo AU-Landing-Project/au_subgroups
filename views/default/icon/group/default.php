@@ -46,7 +46,7 @@ if (isset($vars['href'])) {
 	$url = $vars['href'];
 }
 
-$icon_sizes = elgg_get_config('icon_sizes');
+$icon_sizes = (function_exists('elgg_get_icon_sizes') ? elgg_get_icon_sizes() : elgg_get_config('icon_sizes'));
 $size = $vars['size'];
 
 // maintain aspect ratio
