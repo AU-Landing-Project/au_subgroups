@@ -3,7 +3,7 @@
     <name>AU Sub-Groups</name>
     <id>au_subgroups</id>
     <author>Matt Beckett</author>
-    <version>2.1.0</version>
+    <version>2.1.1</version>
     <description>Allows creation of groups within groups</description>
     <website>https://landing.athabascau.ca</website>
     <copyright>(C) Athabasca University, 2015</copyright>
