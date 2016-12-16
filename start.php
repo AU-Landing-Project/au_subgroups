@@ -90,23 +90,21 @@ function au_subgroups_pagehandler($page) {
 			elgg_set_page_owner_guid($page[1]);
 			echo elgg_view('resources/au_subgroups/add');
 			return true;
-			break;
 		
 		case 'list':
 			elgg_set_page_owner_guid($page[1]);
 			echo elgg_view('resources/au_subgroups/list');
-			break;
+			return true;
 		
 		case 'delete':
 			elgg_set_page_owner_guid($page[1]);
 			echo elgg_view('resources/au_subgroups/delete');
-			break;
+			return true;
 		
 		case 'openclosed':
 			set_input('filter', $page[1]);
 			echo elgg_view('resources/au_subgroups/openclosed');
 			return true;
-			break;
 	}
 	
 	return false;
