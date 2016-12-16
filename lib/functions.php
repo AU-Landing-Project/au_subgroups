@@ -143,38 +143,77 @@ function get_parent_group($group) {
 	return false;
 }
 
-function get_subgroups($group, $limit = 10, $sortbytitle = true) {
-	$options = array(
-		'types' => array('group'),
-		'relationship' => AU_SUBGROUPS_RELATIONSHIP,
-		'relationship_guid' => $group->guid,
-		'inverse_relationship' => true,
-		'limit' => $limit,
+/**
+ * Get subgroups
+ *
+ * @param ElggGroup $group       Parent group
+ * @param array     $options     ege* options
+ * @param bool      $sortbytitle Sort by group title
+ * @return ElggGroup[]|false
+ */
+function get_subgroups($group, $options = [], $sortbytitle = true) {
+
+	if (is_int($options)) {
+		// support legacy $limit argument
+		$options = [
+			'limit' => $options,
+		];
+	}
+
+	$defaults = array(
+		'types' => 'group',
+		'limit' => 10,
 	);
 
+	$options = array_merge($defaults, $options);
+
+	$options['relationship'] = AU_SUBGROUPS_RELATIONSHIP;
+	$options['relationship_guid'] = (int) $group->guid;
+	$options['inverse_relationship'] = true;
+
 	if ($sortbytitle) {
-		$options['joins'] = array("JOIN " . elgg_get_config('dbprefix') . "groups_entity g ON e.guid = g.guid");
+		$dbprefix = elgg_get_config('dbprefix');
+		$options['joins'][] = "JOIN {$dbprefix}groups_entity g ON e.guid = g.guid";
 		$options['order_by'] = "g.name ASC";
 	}
 
 	return elgg_get_entities_from_relationship($options);
 }
 
-function list_subgroups($group, $limit = 10) {
-	$options = array(
-		'types' => array('group'),
-		'relationship' => AU_SUBGROUPS_RELATIONSHIP,
-		'relationship_guid' => $group->guid,
-		'inverse_relationship' => true,
-		'joins' => array("JOIN " . elgg_get_config('dbprefix') . "groups_entity g ON e.guid = g.guid"),
+/**
+ * Display a list of subgroups
+ *
+ * @param \ElggGroup $group   Parent group
+ * @param array      $options ege* options
+ * @return string
+ */
+function list_subgroups($group, $options = []) {
+	if (is_int($options)) {
+		// support legacy $limit argument
+		$options = [
+			'limit' => $options,
+		];
+	}
+
+	$dbprefix = elgg_get_config('dbprefix');
+	$defaults = array(
+		'types' => 'group',
+		'joins' => array(
+			"JOIN {$dbprefix}groups_entity g ON e.guid = g.guid",
+		),
 		'order_by' => "g.name ASC",
-		'limit' => $limit,
+		'limit' => 10,
 		'full_view' => false
 	);
 
+	$options = array_merge($defaults, $options);
+
+	$options['relationship'] = AU_SUBGROUPS_RELATIONSHIP;
+	$options['relationship_guid'] = (int) $group->guid;
+	$options['inverse_relationship'] = true;
+
 	return elgg_list_entities_from_relationship($options);
 }
-
 
 /**
  * Sets breadcrumbs from 'All groups' to current parent
