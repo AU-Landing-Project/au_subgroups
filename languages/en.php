@@ -1,6 +1,6 @@
 <?php
 
-$english = array(
+return array(
     'au_subgroups' => "Sub-Groups",
     'au_subgroups:subgroup' => "Sub-Group",
     'au_subgroups:subgroups' => "Sub-Groups",
@@ -60,7 +60,4 @@ automatically join you as a member of all parent groups.
 Click below to view your invitations:
 
 %s",
-
 );
-					
-add_translation("en",$english);
