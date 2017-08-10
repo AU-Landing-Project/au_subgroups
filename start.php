@@ -95,11 +95,13 @@ function au_subgroups_pagehandler($page) {
 		case 'list':
 			elgg_set_page_owner_guid($page[1]);
 			echo elgg_view('resources/au_subgroups/list');
+                       return true;
 			break;
 		
 		case 'delete':
 			elgg_set_page_owner_guid($page[1]);
 			echo elgg_view('resources/au_subgroups/delete');
+                       return true;
 			break;
 		
 		case 'openclosed':
