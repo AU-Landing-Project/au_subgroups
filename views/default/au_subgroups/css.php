@@ -2,7 +2,7 @@
 
 namespace AU\SubGroups;
 
-$icon_sizes = elgg_get_config('icon_sizes');
+$icon_sizes = elgg_get_icon_sizes();
 $default_bg_image = elgg_get_site_url() . 'mod/' . PLUGIN_ID . '/graphics/iconbg.png';
 $background_image = elgg_trigger_plugin_hook('au_subgroups', 'bg_image', null, $default_bg_image);
 $font_size = array(
