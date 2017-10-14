@@ -33,7 +33,7 @@ function init() {
   elgg_register_event_handler('create', 'group', __NAMESPACE__ . '\\clone_layout_on_create', 1000);
   elgg_register_event_handler('create', 'group', __NAMESPACE__ . '\\group_visibility', 1000);
   elgg_register_event_handler('delete', 'group', __NAMESPACE__ . '\\delete_group_event', 1000);
-  elgg_register_event_handler('pagesetup', 'system', __NAMESPACE__ . '\\pagesetup');
+  elgg_register_event_handler('register', 'menu:page' __NAMESPACE__ . '\\pagesetup');
 
   // replace the existing groups library so we can push some display options
   elgg_register_library('elgg:groups', __DIR__ . '/lib/groups.php');
