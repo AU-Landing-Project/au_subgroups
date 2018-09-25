@@ -308,3 +308,46 @@ function can_move_subgroup($subgroup, $parent, $user = NULL) {
 
 	return true;
 }
+
+/**
+ * Determines if a user could leave or be removed from a parent group
+ * 
+ * @param type $group ElggGroup
+ * @param type $user ElggUser
+ * @return int 0 if cannot leave, the number of groups to leave otherwise
+ */
+function can_leave_group($group, $user) {
+	if (!elgg_instanceof($user, 'user')) {
+		$user = elgg_get_logged_in_user_entity();
+	}
+
+	if (!$user) {
+		return false;
+	}
+
+	// make sure they're really groups
+	if (!elgg_instanceof($group, 'group')) {
+		return false;
+	}
+	
+	// Get subgroup guids
+	$subgroup_guids = get_all_children_guids($group);
+	if(empty($subgroup_guids)) {
+		return 1;
+	}
+
+	// Check if user is a subgroup owner
+	$nb_of_subgroups_to_leave = 0;
+	foreach ($subgroup_guids as $subgroup_guid) {
+		$subgroup = get_entity($subgroup_guid);
+		if (!$subgroup) {
+			elgg_log("Cannot get_entity from subgroup_guid: $subgroup_guid !", 'ERROR');
+		} else if ($subgroup->getOwnerGUID() == $user->getGUID()) {
+			return false;
+		} else if ($subgroup->isMember($user)) {
+		    $nb_of_subgroups_to_leave++;
+		}
+	}
+	
+	return 1 + $nb_of_subgroups_to_leave;
+}
