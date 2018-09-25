@@ -60,4 +60,11 @@ automatically join you as a member of all parent groups.
 Click below to view your invitations:
 
 %s",
+    
+    // Leave and Remove actions
+    'au_subgroups:cantleave' => 'Could not leave group because you own at least a subgroup',
+    'au_subgroups:left' => 'Successfully left group and %d subgroup(s)',
+    'au_subgroups:cantremove' => 'Cannot remove user from group because he owns at least a subgroup',
+    'au_subgroups:removed' => 'Successfully removed %s from group and %d subgroup(s)',
+
 );

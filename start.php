@@ -69,7 +69,12 @@ function init() {
   
   // actions
   elgg_register_action('au_subgroups/move', __DIR__ . '/actions/move.php');
-  
+  // Overload "groups/leave" & "groups/remove" actions
+  elgg_unregister_action("groups/leave");
+  elgg_register_action("groups/leave", __DIR__ . '/actions/groups/membership/leave.php');
+  elgg_unregister_action("groups/remove");
+  elgg_register_action("groups/remove", __DIR__ . '/actions/groups/membership/remove.php');
+
   elgg_register_event_handler('upgrade', 'system', __NAMESPACE__ . '\\upgrades');
 }
 
