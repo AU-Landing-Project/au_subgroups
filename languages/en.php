@@ -41,7 +41,7 @@ return array(
 	 * Move group
 	 */
 	'au_subgroups:move:edit:title' => "Make this group a subgroup of another group",
-	'au_subgroups:transfer:help' => "You can set this group as a subgroup of any other group you have permissions to edit.  If users are not a member of the new parent group, they will be removed from this group and sent a new invitation that will enroll them in the new parent group and all subgroups leading to this one. <b>This will also transfer any subgroups of this group</b>",
+	'au_subgroups:transfer:help' => "You can set this group as a subgroup of any other group you have permissions to edit if and only if this group owner is already a member of the new parent group. If other users are not members of the new parent group, they will be removed from this group and sent a new invitation that will enroll them in the new parent group and all subgroups leading to this one. <b>This will also transfer any subgroups of this group</b>",
 	'au_subgroups:search:text' => "Search Groups",
 	'au_subgroups:search:noresults' => "No groups found",
 	'au_subgroups:error:timeout' => "Search timed out",

@@ -289,6 +289,11 @@ function can_move_subgroup($subgroup, $parent, $user = NULL) {
 		return false;
 	}
 
+	// make sure subgroup owner is member of target parent group
+	if (!$parent->isMember($subgroup->getOwnerEntity())) {
+		return false;
+	}
+	
 	// make sure we can edit all the way up, and we're not trying to move a group into itself
 	if (!can_edit_recursive($subgroup) || $subgroup->guid == $parent->guid) {
 		return false;
