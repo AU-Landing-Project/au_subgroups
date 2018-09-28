@@ -285,7 +285,7 @@ function can_move_subgroup($subgroup, $parent, $user = NULL) {
 	}
 
 	// make sure we can edit them
-	if (!$subgroup->canEdit($user->guid) || !$parent->canEdit($user->guid)) {
+	if (!$subgroup->isMember($user) || !$subgroup->canEdit($user->guid) || !$parent->isMember($user) || !$parent->canEdit($user->guid)) {
 		return false;
 	}
 
