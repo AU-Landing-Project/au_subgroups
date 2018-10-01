@@ -78,8 +78,9 @@ $batch = new \ElggBatch('elgg_get_entities_from_relationship', $options);
 $invite = array();
 
 foreach ($batch as $member) {
-  if (!is_group_member($parent_guid, $member->guid)) {
-	$invite[] = $member->guid;
+  $member_guid = $member->guid;
+  if (!is_group_member($parent_guid, $member_guid)) {
+	$invite[] = $member_guid;
 	// the user isn't a member of the parent group
 	// so we have to remove them from this subgroup, and all subgroups of this subgroup
 	// and send them an invitation
