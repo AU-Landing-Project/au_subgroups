@@ -251,7 +251,14 @@ function join_parents_recursive($group, $user = NULL) {
 
 	while ($parent = get_parent_group($group)) {
 		if (!$parent->isMember($user)) {
-			$parent->join($user);
+			if ($parent->join($user)) {
+				elgg_create_river_item(array(
+				    'view' => 'river/relationship/member/create',
+				    'action_type' => 'join',
+				    'subject_guid' => $user->guid,
+				    'object_guid' => $parent->guid,
+				));
+			}
 		}
 
 		$group = $parent;
