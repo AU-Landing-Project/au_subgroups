@@ -30,6 +30,7 @@ if ($au_subgroup) {
 		?>
 
 		<script>
+		require(['elgg', 'jquery'], function (elgg, $) {
 			$(document).ready(function() {
 				$('.elgg-form-groups-edit select[name=vis]').prepend('<option value="parent_group_acl"><?php echo elgg_echo('au_subgroups:option:parent:members'); ?></option>');
 
@@ -67,6 +68,7 @@ if ($au_subgroup) {
 		}
 		?>
 			});
+		});
 		</script>
 
 		<?php
