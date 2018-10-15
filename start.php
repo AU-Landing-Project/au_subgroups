@@ -27,7 +27,7 @@ function init() {
   // after group creation or editing we need to check the permissions
   elgg_register_event_handler('update', 'group', __NAMESPACE__ . '\\group_visibility');
   elgg_register_event_handler('create', 'relationship', __NAMESPACE__ . '\\join_group_event', 0);
-  elgg_register_event_handler('leave', 'group', __NAMESPACE__ . '\\leave_group_event');
+  elgg_register_event_handler('leave', 'group', __NAMESPACE__ . '\\leave_group_event', 400);
   // break up the create/update events to be more manageable
   elgg_register_event_handler('create', 'group', __NAMESPACE__ . '\\add_parent', 1000);
   elgg_register_event_handler('create', 'group', __NAMESPACE__ . '\\clone_layout_on_create', 1000);
