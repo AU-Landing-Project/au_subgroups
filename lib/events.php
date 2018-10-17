@@ -196,10 +196,21 @@ function join_group_event($event, $type, $relationship) {
  * @param type $object
  */
 function leave_group_event($event, $type, $params) {
-	$guids = get_all_children_guids($params['group']);
+	$group = elgg_extract('group', $params);
+	$user = elgg_extract('user', $params);
+	if (!($group instanceof \ElggGroup) || !($user instanceof \ElggUser)) {
+		return;
+	}
+	
+	$subgroups = get_subgroups($group, 0);
+	if (empty($subgroups)) {
+		return;
+	}
 
-	foreach ($guids as $guid) {
-		leave_group($guid, $params['user']->guid);
+	foreach ($subgroups as $subgroup) {
+		if ($subgroup->isMember($user)) {
+			$subgroup->leave($user);
+		}
 	}
 }
 
